@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pytest = "*"
+
+[dev-packages]
+bs4 = "*"
+requests = "*"
+colorama = "*"
+urllib3 = "*"
+python-decouple = "*"
+
+[requires]
+python_version = "3"
