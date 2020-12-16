@@ -1,4 +1,4 @@
-Get Gecko
+Get GeckoDriver
 =================
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/get-gecko-driver?color=blue)](https://pypi.python.org/pypi/get-gecko-driver)
 [![PyPI](https://img.shields.io/pypi/v/get-gecko-driver?color=blue)](https://pypi.python.org/pypi/get-gecko-driver)
