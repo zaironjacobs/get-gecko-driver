@@ -81,8 +81,8 @@ class App:
         ###############
         # LATEST URLS #
         ###############
-        self.__arg_latest_urls = self.__args.latest_urls
-        if self.__arg_passed(self.__arg_latest_urls):
+        self.__arg_latest_release_urls = self.__args.latest_release_urls
+        if self.__arg_passed(self.__arg_latest_release_urls):
             self.print_latest_urls()
             sys.exit(0)
 

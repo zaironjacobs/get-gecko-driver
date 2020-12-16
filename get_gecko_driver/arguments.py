@@ -10,7 +10,7 @@ message_help_optional_extract = descriptor.format('', 'optional: use --extract t
 
 args_options = [
     ['--latest-version', 'print the latest release version'],
-    ['--latest-urls', 'print latest release urls for all platforms'],
+    ['--latest-release-urls', 'print latest release urls for all platforms'],
     ['--release-url', 'print the url of a release for a platform' + '\n'
      + message_help_required_platform + '\n'
      + message_help_required_release],

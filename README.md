@@ -56,7 +56,7 @@ get_driver.download_release('0.27.0', extract=True)
 Print the latest release url of all platforms:
 
 ```console
-$ get-gecko-driver --latest-urls
+$ get-gecko-driver --latest-release-urls
 ```
 
 Print the latest release version:
@@ -94,7 +94,7 @@ $ get-gecko-driver --download-release macos 0.27.0 --extract
 
 --latest-version            Print the latest release version.
 
---latest-urls               Print the latest release urls for all platforms.
+--latest-release-urls       Print the latest release urls for all platforms.
 
 --release-url               Print the url of a release for a platform.
 
