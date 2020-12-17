@@ -12,3 +12,7 @@ class UnknownPlatformError(GetGeckoDriverError):
 
 class UnknownReleaseError(GetGeckoDriverError):
     pass
+
+
+class DownloadError(GetGeckoDriverError):
+    pass

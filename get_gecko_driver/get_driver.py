@@ -9,18 +9,18 @@ from requests.exceptions import HTTPError
 from . import constants
 from .platforms import Platforms
 from . import retriever
-from .exceptions import GetGeckoDriverError
 from .exceptions import UnknownPlatformError
 from .exceptions import ReleaseUrlError
 from .exceptions import UnknownReleaseError
+from .exceptions import DownloadError
 
 
 class GetGeckoDriver:
-    def __init__(self, platform):
+    def __init__(self, platform) -> None:
         self.__available_platforms = Platforms()
         self.__current_set_platform = self.__check_platform(platform)
 
-    def latest_release_version(self):
+    def latest_release_version(self) -> str:
         """ Return the latest release version """
 
         result = requests.get(constants.GITHUB_GECKODRIVER_RELEASES)
@@ -31,12 +31,12 @@ class GetGeckoDriver:
         self.__check_release(release)
         return release
 
-    def latest_release_url(self):
+    def latest_release_url(self) -> str:
         """ Return the latest release url """
 
         return self.release_url(self.latest_release_version())
 
-    def release_url(self, release):
+    def release_url(self, release) -> str:
         """ Return the release download url """
 
         self.__check_release(release)
@@ -59,25 +59,22 @@ class GetGeckoDriver:
                   + constants.TAR_GZ_TYPE
 
         self.__check_url(url)
+
         return url
 
-    def download_latest_release(self, output_path=None, extract=False):
+    def download_latest_release(self, output_path=None, extract=False) -> None:
         """ Download the latest geckodriver release """
 
         release = self.latest_release_version()
-        if release is None:
-            return False
-
         self.download_release(release, output_path, extract)
-        return True
 
-    def download_release(self, release, output_path=None, extract=False):
+    def download_release(self, release, output_path=None, extract=False) -> None:
         """ Download a geckodriver release """
 
         self.__check_release(release)
         url = self.release_url(release)
 
-        def download(platform_arch, extract_type):
+        def download(platform_arch, extract_type) -> None:
             if output_path is None:
                 output_path_no_file_name = constants.DIR_DOWNLOADS + '/' + release + '/' + platform_arch
             else:
@@ -87,7 +84,7 @@ class GetGeckoDriver:
                 output_path_with_file_name, file_name = retriever.download(url=url,
                                                                            output_path=output_path_no_file_name)
             except (OSError, HTTPError, RequestException) as err:
-                raise GetGeckoDriverError(err)
+                raise DownloadError(err)
 
             if extract:
                 if extract_type == constants.ZIP_TYPE:
@@ -108,13 +105,13 @@ class GetGeckoDriver:
         elif self.__current_set_platform == self.__available_platforms.macos:
             download(self.__available_platforms.macos, constants.TAR_GZ_TYPE)
 
-    def __check_url(self, url):
+    def __check_url(self, url) -> None:
         """ Check if url is valid """
 
         if requests.head(url).status_code != 302:
             raise ReleaseUrlError('Error: Invalid url (Possible cause: non-existent release version)')
 
-    def __check_release(self, release):
+    def __check_release(self, release) -> None:
         """ Check if release format is valid """
 
         split_release = release.split('.')
@@ -123,10 +120,10 @@ class GetGeckoDriver:
             if not number.isnumeric():
                 raise UnknownReleaseError('Error: Invalid release format')
 
-    def __check_platform(self, platform):
+    def __check_platform(self, platform) -> str:
         """ Check if platform is valid """
 
         if platform not in self.__available_platforms.list:
-            raise UnknownPlatformError('Error: Platform not recognized, choose a platform from: '
+            raise UnknownPlatformError('error: platform not recognized, choose a platform from: '
                                        + str(self.__available_platforms.list))
         return platform
