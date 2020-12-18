@@ -77,7 +77,7 @@ Download the latest release of a specific platform:
 $ get-gecko-driver --download-latest win64
 ```
 
-Download a specific release for a specific platform and extract the zip file:
+Download a specific release for a specific platform and extract the zip/tar file:
 
 ```console
 $ get-gecko-driver --download-release macos 0.27.0 --extract
