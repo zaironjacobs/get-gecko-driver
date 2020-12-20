@@ -180,56 +180,54 @@ class GetGeckoDriver:
         path = os.path.join(os.path.abspath(os.getcwd()), output_path)
         os.environ['PATH'] += os.pathsep + os.pathsep.join([path])
 
+    def __get_all_geckodriver_versions(self) -> list:
+        """ Return a list with all GeckoDriver versions """
 
-def __get_all_geckodriver_versions(self) -> list:
-    """ Return a list with all GeckoDriver versions """
+        def find_versions(param=None) -> list:
+            if not param:
+                url = constants.GITHUB_GECKODRIVER_TAGS_URL
+            else:
+                url = constants.GITHUB_GECKODRIVER_TAGS_URL + param
 
-    def find_versions(param=None) -> list:
-        if not param:
-            url = constants.GITHUB_GECKODRIVER_TAGS_URL
-        else:
-            url = constants.GITHUB_GECKODRIVER_TAGS_URL + param
+            res = requests.get(url)
 
-        res = requests.get(url)
+            if res.status_code != 200:
+                raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_TAGS_URL)
 
-        if res.status_code != 200:
-            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_TAGS_URL)
+            soup = BeautifulSoup(res.content, 'html.parser')
+            box_el = soup.select_one('div.Box:nth-child(2)')
 
-        soup = BeautifulSoup(res.content, 'html.parser')
-        box_el = soup.select_one('div.Box:nth-child(2)')
+            count = 0
+            versions = []
+            for element in box_el.select('.d-flex > h4 > a'):
+                versions.append(element.text.strip())
+                count += 1
 
-        count = 0
-        versions = []
-        for element in box_el.select('.d-flex > h4 > a'):
-            versions.append(element.text.strip())
-            count += 1
+            if len(versions) == 10:
+                versions += find_versions('?after=' + versions[-1])
 
-        if len(versions) == 10:
-            versions += find_versions('?after=' + versions[-1])
+            return versions
 
-        return versions
+        all_versions = find_versions()
+        for index, version in enumerate(all_versions):
+            if version[:1] == 'v':
+                all_versions[index] = version[1:]
+        return all_versions
 
-    all_versions = find_versions()
-    for index, version in enumerate(all_versions):
-        if version[:1] == 'v':
-            all_versions[index] = version[1:]
-    return all_versions
+    def __get_installed_firefox_version(self) -> str:
+        """ Return the installed Firefox version on the machine """
 
+        if pl.system() == 'Windows':
+            firefox_path = 'C:/Program Files/Mozilla Firefox/firefox.exe'
+            process = subprocess.Popen([firefox_path, '-v', '|', 'find "Mozilla"'],
+                                       stdout=subprocess.PIPE)
+            return process.communicate()[0].decode('UTF-8').split()[-1]
 
-def __get_installed_firefox_version(self) -> str:
-    """ Return the installed Firefox version on the machine """
+        elif pl.system() == 'Linux':
+            process = subprocess.Popen(
+                ['firefox', '--version'],
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+            return process.communicate()[0].decode('UTF-8').split()[-1]
 
-    if pl.system() == 'Windows':
-        firefox_path = 'C:/Program Files/Mozilla Firefox/firefox.exe'
-        process = subprocess.Popen([firefox_path, '-v', '|', 'find "Mozilla"'],
-                                   stdout=subprocess.PIPE)
-        return process.communicate()[0].decode('UTF-8').split()[-1]
-
-    elif pl.system() == 'Linux':
-        process = subprocess.Popen(
-            ['firefox', '--version'],
-            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
-        return process.communicate()[0].decode('UTF-8').split()[-1]
-
-    elif pl.system() == 'Darwin':
-        raise FeatureNotImplementedError('feature has not been implemented for macOS yet')
+        elif pl.system() == 'Darwin':
+            raise FeatureNotImplementedError('feature has not been implemented for macOS yet')
