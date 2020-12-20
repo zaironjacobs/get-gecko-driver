@@ -173,7 +173,7 @@ class GetGeckoDriver:
                                        + str(self.__platforms.list))
         return platform
 
-    def auto_install(self) -> None:
+    def install(self) -> None:
         """ Install the latest GeckoDriver release """
 
         output_path = self.download_release(self.latest_release_version(), extract=True)

@@ -35,13 +35,13 @@ from selenium import webdriver
 # Downloads the latest GeckoDriver release
 # Adds the downloaded GeckoDriver to path
 get_driver = GetGeckoDriver()
-get_driver.auto_install()
+get_driver.install()
 
 # Use the installed GeckoDriver with Selenium
-gecko_driver = webdriver.Firefox()
-gecko_driver.get("https://google.com")
+driver = webdriver.Firefox()
+driver.get("https://google.com")
 time.sleep(3)
-gecko_driver.quit()
+driver.quit()
 ```
 
 #### For downloading only
