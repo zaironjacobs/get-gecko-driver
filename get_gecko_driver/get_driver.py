@@ -1,6 +1,10 @@
+import os
 import requests
 import zipfile
 import tarfile
+import platform as pl
+import subprocess
+import struct
 from bs4 import BeautifulSoup
 
 from requests.exceptions import RequestException
@@ -9,21 +13,36 @@ from requests.exceptions import HTTPError
 from . import constants
 from .platforms import Platforms
 from . import retriever
+from .exceptions import GetGeckoDriverError
 from .exceptions import UnknownPlatformError
 from .exceptions import ReleaseUrlError
 from .exceptions import UnknownReleaseError
 from .exceptions import DownloadError
+from .exceptions import FeatureNotImplementedError
 
 
 class GetGeckoDriver:
-    def __init__(self, platform) -> None:
-        self.__available_platforms = Platforms()
-        self.__current_set_platform = self.__check_platform(platform)
+    def __init__(self, platform=None) -> None:
+        self.__platforms = Platforms()
+
+        if not platform:
+            if pl.system() == 'Windows':
+                self.__platform = self.__check_platform(self.__platforms.win)
+            elif pl.system() == 'Linux':
+                self.__platform = self.__check_platform(self.__platforms.linux)
+            elif pl.system() == 'Darwin':
+                self.__platform = self.__check_platform(self.__platforms.macos)
+        else:
+            self.__platform = self.__check_platform(platform)
 
     def latest_release_version(self) -> str:
         """ Return the latest release version """
 
-        result = requests.get(constants.GITHUB_GECKODRIVER_RELEASES)
+        result = requests.get(constants.GITHUB_GECKODRIVER_RELEASES_URL)
+
+        if result.status_code != 200:
+            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_RELEASES_URL)
+
         soup = BeautifulSoup(result.content, 'html.parser')
         anchor = soup.select_one(constants.GITHUB_GECKODRIVER_LATEST_RELEASE_ANCHOR)
         release = anchor.text
@@ -41,26 +60,49 @@ class GetGeckoDriver:
 
         self.__check_release(release)
 
-        url = ''
-        if self.__current_set_platform == self.__available_platforms.win_32_arch:
-            url = constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__available_platforms.win_32_arch) \
-                  + constants.ZIP_TYPE
-        elif self.__current_set_platform == self.__available_platforms.win_64_arch:
-            url = constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__available_platforms.win_64_arch) \
-                  + constants.ZIP_TYPE
-        elif self.__current_set_platform == self.__available_platforms.linux_32_arch:
-            url = constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__available_platforms.linux_32_arch) \
-                  + constants.TAR_GZ_TYPE
-        elif self.__current_set_platform == self.__available_platforms.linux_64_arch:
-            url = constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__available_platforms.linux_64_arch) \
-                  + constants.TAR_GZ_TYPE
-        elif self.__current_set_platform == self.__available_platforms.macos:
-            url = constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__available_platforms.macos) \
-                  + constants.TAR_GZ_TYPE
+        arch = struct.calcsize('P') * 8
+        arch_64 = 64
 
-        self.__check_url(url)
+        if self.__platform == self.__platforms.win:
 
-        return url
+            # 64bit
+            if arch == arch_64:
+                try:
+                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.win_64)
+                           + constants.ZIP_TYPE)
+                    self.__check_url(url)
+                    return url
+                except ReleaseUrlError:
+                    pass
+            # 32bit
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.win_32)
+                   + constants.ZIP_TYPE)
+            self.__check_url(url)
+            return url
+
+        elif self.__platform == self.__platforms.linux:
+
+            # 64bit
+            if arch == arch_64:
+                try:
+                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.linux_64)
+                           + constants.TAR_GZ_TYPE)
+                    self.__check_url(url)
+                    return url
+                except ReleaseUrlError:
+                    pass
+            # 32bit
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.linux_32)
+                   + constants.TAR_GZ_TYPE)
+            self.__check_url(url)
+            return url
+
+        elif self.__platform == self.__platforms.macos:
+
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.macos)
+                   + constants.TAR_GZ_TYPE)
+            self.__check_url(url)
+            return url
 
     def download_latest_release(self, output_path=None, extract=False) -> None:
         """ Download the latest geckodriver release """
@@ -68,20 +110,19 @@ class GetGeckoDriver:
         release = self.latest_release_version()
         self.download_release(release, output_path, extract)
 
-    def download_release(self, release, output_path=None, extract=False) -> None:
+    def download_release(self, release, output_path=None, extract=False) -> str:
         """ Download a geckodriver release """
 
         self.__check_release(release)
-        url = self.release_url(release)
 
-        def download(platform_arch, extract_type) -> None:
+        def download(url_download, extract_type) -> str:
             if output_path is None:
-                output_path_no_file_name = constants.DIR_DOWNLOADS + '/' + release + '/' + platform_arch
+                output_path_no_file_name = constants.DIR_DOWNLOAD + '/' + release + '/bin'
             else:
                 output_path_no_file_name = output_path
 
             try:
-                output_path_with_file_name, file_name = retriever.download(url=url,
+                output_path_with_file_name, file_name = retriever.download(url=url_download,
                                                                            output_path=output_path_no_file_name)
             except (OSError, HTTPError, RequestException) as err:
                 raise DownloadError(err)
@@ -94,16 +135,20 @@ class GetGeckoDriver:
                     with tarfile.open(output_path_with_file_name, "r:gz") as tar_gz_ref:
                         tar_gz_ref.extractall(path=output_path_no_file_name)
 
-        if self.__current_set_platform == self.__available_platforms.win_32_arch:
-            download(self.__available_platforms.win_32_arch, constants.ZIP_TYPE)
-        elif self.__current_set_platform == self.__available_platforms.win_64_arch:
-            download(self.__available_platforms.win_64_arch, constants.ZIP_TYPE)
-        elif self.__current_set_platform == self.__available_platforms.linux_32_arch:
-            download(self.__available_platforms.linux_32_arch, constants.TAR_GZ_TYPE)
-        elif self.__current_set_platform == self.__available_platforms.linux_64_arch:
-            download(self.__available_platforms.linux_64_arch, constants.TAR_GZ_TYPE)
-        elif self.__current_set_platform == self.__available_platforms.macos:
-            download(self.__available_platforms.macos, constants.TAR_GZ_TYPE)
+                os.remove(output_path_with_file_name)
+
+                if pl.system() == 'Linux':
+                    os.chmod(output_path_no_file_name + '/' + constants.FILE_NAME_GECKODRIVER, 0o755)
+
+            return output_path_no_file_name
+
+        url = self.release_url(release)
+        if self.__platform == self.__platforms.win:
+            return download(url, constants.ZIP_TYPE)
+        elif self.__platform == self.__platforms.linux:
+            return download(url, constants.TAR_GZ_TYPE)
+        elif self.__platform == self.__platforms.macos:
+            return download(url, constants.TAR_GZ_TYPE)
 
     def __check_url(self, url) -> None:
         """ Check if url is valid """
@@ -123,7 +168,68 @@ class GetGeckoDriver:
     def __check_platform(self, platform) -> str:
         """ Check if platform is valid """
 
-        if platform not in self.__available_platforms.list:
+        if platform not in self.__platforms.list:
             raise UnknownPlatformError('error: platform not recognized, choose a platform from: '
-                                       + str(self.__available_platforms.list))
+                                       + str(self.__platforms.list))
         return platform
+
+    def auto_install(self) -> None:
+        """ Install the latest GeckoDriver release """
+
+        output_path = self.download_release(self.latest_release_version(), extract=True)
+        path = os.path.join(os.path.abspath(os.getcwd()), output_path)
+        os.environ['PATH'] += os.pathsep + os.pathsep.join([path])
+
+
+def __get_all_geckodriver_versions(self) -> list:
+    """ Return a list with all GeckoDriver versions """
+
+    def find_versions(param=None) -> list:
+        if not param:
+            url = constants.GITHUB_GECKODRIVER_TAGS_URL
+        else:
+            url = constants.GITHUB_GECKODRIVER_TAGS_URL + param
+
+        res = requests.get(url)
+
+        if res.status_code != 200:
+            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_TAGS_URL)
+
+        soup = BeautifulSoup(res.content, 'html.parser')
+        box_el = soup.select_one('div.Box:nth-child(2)')
+
+        count = 0
+        versions = []
+        for element in box_el.select('.d-flex > h4 > a'):
+            versions.append(element.text.strip())
+            count += 1
+
+        if len(versions) == 10:
+            versions += find_versions('?after=' + versions[-1])
+
+        return versions
+
+    all_versions = find_versions()
+    for index, version in enumerate(all_versions):
+        if version[:1] == 'v':
+            all_versions[index] = version[1:]
+    return all_versions
+
+
+def __get_installed_firefox_version(self) -> str:
+    """ Return the installed Firefox version on the machine """
+
+    if pl.system() == 'Windows':
+        firefox_path = 'C:/Program Files/Mozilla Firefox/firefox.exe'
+        process = subprocess.Popen([firefox_path, '-v', '|', 'find "Mozilla"'],
+                                   stdout=subprocess.PIPE)
+        return process.communicate()[0].decode('UTF-8').split()[-1]
+
+    elif pl.system() == 'Linux':
+        process = subprocess.Popen(
+            ['firefox', '--version'],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+        return process.communicate()[0].decode('UTF-8').split()[-1]
+
+    elif pl.system() == 'Darwin':
+        raise FeatureNotImplementedError('feature has not been implemented for macOS yet')

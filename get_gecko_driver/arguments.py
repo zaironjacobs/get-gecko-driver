@@ -19,11 +19,11 @@ args_options = [
     ['--download-latest', 'download the latest release for a platform' + '\n'
      + message_help_required_platform + '\n'
      + message_help_optional_extract],
-    ['--download-release', 'download a release' + '\n'
+    ['--download-release', 'download a specific release' + '\n'
      + message_help_required_platform + '\n'
      + message_help_required_release + '\n'
      + message_help_optional_extract],
-    ['--extract', 'option to extract the zip file'],
+    ['--extract', 'extract the compressed driver file'],
     ['--version', 'program version'],
     ['--help', 'show help']
 ]
@@ -36,5 +36,5 @@ def print_help():
     for i, argument in enumerate(args_options):
         print(descriptor.format(argument[0], argument[1]))
     print('')
-    print('Find the downloaded drivers at: ')
-    print('<current directory>/<get-gecko-driver_downloads>/<release version>/<platform>/<geckodriver>')
+    print('The downloaded driver can be found at: ')
+    print('<current directory>/<geckodriver>/<version>/<bin>/<geckodriver>')

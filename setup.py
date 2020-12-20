@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 name = 'get-gecko-driver'
-version = '0.1.3'
+version = '0.1.4'
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
@@ -19,11 +19,11 @@ setup(
     version=version,
     author='Zairon Jacobs',
     author_email='zaironjacobs@gmail.com',
-    description='A tool to download GeckoDriver.',
+    description='A tool to download and install GeckoDriver.',
     long_description=long_description,
     url='https://github.com/zaironjacobs/get-gecko-driver',
     download_url='https://github.com/zaironjacobs/get-gecko-driver/archive/v' + version + '.tar.gz',
-    keywords=['gecko', 'geckodriver', 'download', 'web', 'driver', 'tool', 'get'],
+    keywords=['gecko', 'geckodriver', 'download', 'install', 'web', 'driver', 'tool', 'get'],
     packages=find_packages(),
     entry_points={
         'console_scripts': [name + '=get_gecko_driver.app:main'],

@@ -5,7 +5,8 @@ Get GeckoDriver
 [![PyPI - Status](https://img.shields.io/pypi/status/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
 [![PyPI - License](https://img.shields.io/pypi/l/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
 
-A tool to download GeckoDriver. You can use this tool as a package import or as a command-line application.
+A tool to download and install GeckoDriver. Download the latest release or another specific release. You can use 
+this tool as a package import or as a command-line application.
 
 ## Install
 
@@ -23,13 +24,32 @@ $ pip install get-gecko-driver --upgrade
 
 ## Usage
 
-#### Package import
+#### Install and use GeckoDriver with Selenium
+
+```Python
+import time
+from get_gecko_driver import GetGeckoDriver
+from selenium import webdriver
+
+# Install the driver:
+# Downloads the latest GeckoDriver release
+# Adds the downloaded GeckoDriver to path
+get_driver = GetGeckoDriver()
+get_driver.auto_install()
+
+# Use the installed GeckoDriver with Selenium
+gecko_driver = webdriver.Firefox()
+gecko_driver.get("https://google.com")
+time.sleep(3)
+gecko_driver.quit()
+```
+
+#### For downloading only
 
 ```Python
 from get_gecko_driver import GetGeckoDriver
 
-# Platforms to choose from: 'win32', 'win64', 'linux32', linux64', or 'macos'
-get_driver = GetGeckoDriver(platform='win64')
+get_driver = GetGeckoDriver()
 
 # Print the latest release version
 print(get_driver.latest_release_version())
@@ -41,13 +61,13 @@ print(get_driver.latest_release_url())
 print(get_driver.release_url('0.27.0'))
 
 # Download the latest driver release
-# Optional: use output_path='' to specify where to download the driver
-# Optional: use extract=True to extract the zip file
-get_driver.download_latest_release(output_path='webdriver', extract=True)
+# Optional: use output_path= to specify where to download the driver
+# Optional: use extract=True to extract the file
+get_driver.download_latest_release(extract=True)
 
 # Download a specific driver release
-# Optional: use output_path='' to specify where to download the driver
-# Optional: use extract=True to extract the zip file
+# Optional: use output_path= to specify where to download the driver
+# Optional: use extract=True to extract the file
 get_driver.download_release('0.27.0', extract=True)
 ```
 
@@ -65,27 +85,27 @@ Print the latest release version:
 $ get-gecko-driver --latest-version
 ```
 
-Print the latest release url of a specific platform:
+Print the latest release url:
 
 ```console
-$ get-gecko-driver --latest-url linux64
+$ get-gecko-driver --latest-url
 ```
 
-Download the latest release of a specific platform:
+Download the latest release and extract the file:
 
 ```console
-$ get-gecko-driver --download-latest win64
+$ get-gecko-driver --download-latest --extract
 ```
 
-Download a specific release for a specific platform and extract the zip/tar file:
+Download a specific release and extract the file:
 
 ```console
-$ get-gecko-driver --download-release macos 0.27.0 --extract
+$ get-gecko-driver --download-release 0.27.0 --extract
 ```
 
-#### Downloaded drivers will be downloaded by default at:
+#### The downloaded driver can be found at:
 
-*`<current directory>/<gecko_driver_downloads>/<release version>/<platform>/<geckodriver>`*
+*`<current directory>/<geckodriver>/<version>/<bin>/<geckodriver>`*
 
 ### Options
 
@@ -96,15 +116,15 @@ $ get-gecko-driver --download-release macos 0.27.0 --extract
 
 --latest-urls               Print the latest release urls for all platforms.
 
---release-url               Print the url of a release for a platform.
+--release-url               Print the url of a release.
 
---latest-url                Print the latest release url for a platform.
+--latest-url                Print the latest release url.
 
---download-latest           Download the latest release for a platform.
+--download-latest           Download the latest release.
 
---download-release          Download a release.
+--download-release          Download a specific release.
 
---extract                   Option to extract the file.
+--extract                   Extract the compressed driver file.
 
 --version                   Program version.
 ```

@@ -56,6 +56,8 @@ class App:
             self.__parser.add_argument(arguments.args_options[i][0], nargs='*')
         self.__args, self.__unknown = self.__parser.parse_known_args()
 
+        self.__get_driver = GetGeckoDriver()
+
         if self.__unknown:
             print(self.__msg_error_unrecognized_argument)
             sys.exit(0)
@@ -80,7 +82,7 @@ class App:
         ##################
         self.__arg_latest_version = self.__args.latest_version
         if self.__arg_passed(self.__arg_latest_version):
-            self.print_latest_version()
+            self.__print_latest_version()
             sys.exit(0)
 
         ###############
@@ -88,7 +90,7 @@ class App:
         ###############
         self.__arg_latest_urls = self.__args.latest_urls
         if self.__arg_passed(self.__arg_latest_urls):
-            self.print_latest_urls()
+            self.__print_latest_urls()
             sys.exit(0)
 
         ###############
@@ -96,28 +98,10 @@ class App:
         ###############
         self.__arg_release_url = self.__args.release_url
         if self.__arg_passed(self.__arg_release_url):
-            custom_required_message = (self.__msg_required_choose_platform + '\n' + self.__msg_required_add_release)
-            if not self.__arg_release_url:
-                print(custom_required_message)
-                sys.exit(0)
-            if len(self.__arg_release_url) != 2:
-                print(custom_required_message)
-                sys.exit(0)
-
-            platform = self.__arg_release_url[0]
-            release = self.__arg_release_url[1]
-            if self.__platforms.win_32_arch == platform:
-                self.print_release_url(self.__platforms.win_32_arch, release)
-            elif self.__platforms.win_64_arch == platform:
-                self.print_release_url(self.__platforms.win_64_arch, release)
-            elif self.__platforms.linux_32_arch == platform:
-                self.print_release_url(self.__platforms.linux_32_arch, release)
-            elif self.__platforms.linux_64_arch == platform:
-                self.print_release_url(self.__platforms.linux_64_arch, release)
-            elif self.__platforms.macos == platform:
-                self.print_release_url(self.__platforms.macos, release)
+            if len(self.__arg_release_url) < 1:
+                print(self.__msg_required_add_release)
             else:
-                print(custom_required_message)
+                self.__print_release_url(self.__arg_release_url[0])
             sys.exit(0)
 
         ##############
@@ -125,26 +109,7 @@ class App:
         ##############
         self.__arg_latest_url = self.__args.latest_url
         if self.__arg_passed(self.__arg_latest_url):
-            if not self.__arg_latest_url:
-                print(self.__msg_required_choose_platform)
-                sys.exit(0)
-            if len(self.__arg_latest_url) != 1:
-                print(self.__msg_required_choose_platform)
-                sys.exit(0)
-
-            self.__platform = self.__arg_latest_url[0]
-            if self.__platforms.win_32_arch == self.__platform:
-                self.print_latest_url(self.__platforms.win_32_arch)
-            elif self.__platforms.win_64_arch == self.__platform:
-                self.print_latest_url(self.__platforms.win_64_arch)
-            elif self.__platforms.linux_32_arch == self.__platform:
-                self.print_latest_url(self.__platforms.linux_32_arch)
-            elif self.__platforms.linux_64_arch == self.__platform:
-                self.print_latest_url(self.__platforms.linux_64_arch)
-            elif self.__platforms.macos == self.__platform:
-                self.print_latest_url(self.__platforms.macos)
-            else:
-                print(self.__msg_required_choose_platform)
+            self.__print_latest_url()
             sys.exit(0)
 
         ###################
@@ -152,56 +117,28 @@ class App:
         ###################
         self.__arg_download_latest = self.__args.download_latest
         if self.__arg_passed(self.__arg_download_latest):
-            if not self.__arg_download_latest:
-                print(self.__msg_required_choose_platform)
-                print(self.__msg_optional_add_extract)
-                sys.exit(0)
-
             extract = False
             self.__arg_extract = self.__args.extract
             if self.__arg_passed(self.__arg_extract):
                 extract = True
-
-            platform = self.__arg_download_latest[0]
-            if platform in self.__platforms.list:
-                self.download_latest_release(platform, extract)
-            else:
-                print(self.__msg_required_choose_platform)
-                print(self.__msg_optional_add_extract)
-            sys.exit(0)
+            self.__download_latest_release(extract)
 
         ####################
         # DOWNLOAD RELEASE #
         ####################
         self.__arg_download_release = self.__args.download_release
         if self.__arg_passed(self.__arg_download_release):
-            custom_required_message = (self.__msg_required_choose_platform
-                                       + '\n' + self.__msg_required_add_release)
-            if not self.__arg_download_release:
-                print(custom_required_message)
-                print(self.__msg_optional_add_extract)
-                sys.exit(0)
-            if len(self.__arg_download_release) != 2:
-                print(custom_required_message)
-                print(self.__msg_optional_add_extract)
-                sys.exit(0)
-
             extract = False
             self.__arg_extract = self.__args.extract
             if self.__arg_passed(self.__arg_extract):
                 extract = True
-            if len(self.__arg_download_release) != 2:
-                print(custom_required_message)
+            if len(self.__arg_download_release) < 1:
+                print(self.__msg_required_add_release)
                 print(self.__msg_optional_add_extract)
                 sys.exit(0)
             else:
-                platform = self.__arg_download_release[0]
-                if platform in self.__platforms.list:
-                    release = self.__arg_download_release[1]
-                    self.download_release(platform, release, extract)
-                else:
-                    print(custom_required_message)
-                    print(self.__msg_optional_add_extract)
+                release = self.__arg_download_release[0]
+                self.__download_release(release, extract)
             sys.exit(0)
 
         ###########
@@ -212,100 +149,69 @@ class App:
             print('v' + __version__)
             sys.exit(0)
 
-    def __arg_passed(self, arg):
-        """ Check if arguments were passed """
+    def __arg_passed(self, arg) -> bool:
+        """ Check if the argument was passed """
 
         if isinstance(arg, list):
             return True
         return False
 
-    def print_latest_urls(self):
+    def __print_latest_urls(self) -> None:
         """ Print the latest url release for all platforms """
 
-        latest_release_for_str = 'Latest release for '
+        get_driver_win = GetGeckoDriver(self.__platforms.win)
+        get_driver_linux = GetGeckoDriver(self.__platforms.linux)
+        get_driver_macos = GetGeckoDriver(self.__platforms.macos)
+        drivers = {'Windows': get_driver_win, 'Linux': get_driver_linux, 'macOS': get_driver_macos}
 
-        get_driver = GetGeckoDriver(self.__platforms.win_32_arch)
-        print(latest_release_for_str + 'Windows 32:')
-        try:
-            print(get_driver.latest_release_url())
-        except GetGeckoDriverError:
-            print(self.__msg_not_found_error)
-        print('')
+        for index, (key, value) in enumerate(drivers.items()):
+            print('Latest release for ' + key + ': ')
+            try:
+                print('latest: ' + value.latest_release_url())
+            except GetGeckoDriverError:
+                print(self.__msg_no_latest_release_url_error)
 
-        get_driver = GetGeckoDriver(self.__platforms.win_64_arch)
-        print(latest_release_for_str + 'Windows 64:')
-        try:
-            print(get_driver.latest_release_url())
-        except GetGeckoDriverError:
-            print(self.__msg_not_found_error)
-        print('')
+            if index < len(drivers) - 1:
+                print('')
 
-        get_driver = GetGeckoDriver(self.__platforms.linux_32_arch)
-        print(latest_release_for_str + 'Linux 32:')
-        try:
-            print(get_driver.latest_release_url())
-        except GetGeckoDriverError:
-            print(self.__msg_not_found_error)
-        print('')
-
-        get_driver = GetGeckoDriver(self.__platforms.linux_64_arch)
-        print(latest_release_for_str + 'Linux 64:')
-        try:
-            print(get_driver.latest_release_url())
-        except GetGeckoDriverError:
-            print(self.__msg_not_found_error)
-        print('')
-
-        get_driver = GetGeckoDriver(self.__platforms.macos)
-        print(latest_release_for_str + 'macOS:')
-        try:
-            print(get_driver.latest_release_url())
-        except GetGeckoDriverError:
-            print(self.__msg_not_found_error)
-
-    def print_latest_version(self):
+    def __print_latest_version(self) -> None:
         """ Print the latest version """
 
-        get_driver = GetGeckoDriver(self.__platforms.win_64_arch)
         try:
-            print(get_driver.latest_release_version())
+            print(self.__get_driver.latest_release_version())
         except GetGeckoDriverError:
             print(self.__msg_no_latest_release_url_error)
 
-    def print_latest_url(self, platform):
+    def __print_latest_url(self) -> None:
         """ Print the url of the latest release """
 
-        get_driver = GetGeckoDriver(platform)
         try:
-            print(get_driver.latest_release_url())
+            print(self.__get_driver.latest_release_url())
         except GetGeckoDriverError:
             print(self.__msg_release_url_error)
 
-    def print_release_url(self, platform, release):
+    def __print_release_url(self, release) -> None:
         """ Print the url for a given version """
 
-        get_driver = GetGeckoDriver(platform)
         try:
-            print(get_driver.release_url(release))
+            print(self.__get_driver.release_url(release))
         except GetGeckoDriverError:
             print(self.__msg_release_url_error)
 
-    def download_latest_release(self, platform, extract):
+    def __download_latest_release(self, extract) -> None:
         """ Download the latest release """
 
-        get_driver = GetGeckoDriver(platform)
         try:
-            get_driver.download_latest_release(extract=extract)
+            self.__get_driver.download_latest_release(extract=extract)
             print(self.__msg_download_finished)
         except GetGeckoDriverError:
             print(self.__msg_download_error)
 
-    def download_release(self, platform, release, extract):
+    def __download_release(self, release, extract) -> None:
         """ Download the release of a given version """
 
-        get_driver = GetGeckoDriver(platform)
         try:
-            get_driver.download_release(release, extract=extract)
+            self.__get_driver.download_release(release, extract=extract)
             print(self.__msg_download_finished)
         except GetGeckoDriverError:
             print(self.__msg_download_error)
