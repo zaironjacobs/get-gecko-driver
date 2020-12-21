@@ -7,6 +7,4 @@ GITHUB_GECKODRIVER_LATEST_RELEASE_ANCHOR = '.label-latest > div:nth-child(2) > d
 ZIP_TYPE = '.zip'
 TAR_GZ_TYPE = '.tar.gz'
 
-FILE_NAME_GECKODRIVER = 'geckodriver'
-
-DIR_DOWNLOAD = 'geckodriver'
+GECKODRIVER = 'geckodriver'

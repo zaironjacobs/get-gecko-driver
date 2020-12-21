@@ -117,7 +117,7 @@ class GetGeckoDriver:
 
         def download(url_download, extract_type) -> str:
             if output_path is None:
-                output_path_no_file_name = constants.DIR_DOWNLOAD + '/' + release + '/bin'
+                output_path_no_file_name = constants.GECKODRIVER + '/' + release + '/bin'
             else:
                 output_path_no_file_name = output_path
 
@@ -138,7 +138,7 @@ class GetGeckoDriver:
                 os.remove(output_path_with_file_name)
 
                 if pl.system() == 'Linux':
-                    os.chmod(output_path_no_file_name + '/' + constants.FILE_NAME_GECKODRIVER, 0o755)
+                    os.chmod(output_path_no_file_name + '/' + constants.GECKODRIVER, 0o755)
 
             return output_path_no_file_name
 
@@ -176,7 +176,16 @@ class GetGeckoDriver:
     def install(self) -> None:
         """ Install the latest GeckoDriver release """
 
-        output_path = self.download_release(self.latest_release_version(), extract=True)
+        output_path = constants.GECKODRIVER + '/' + self.latest_release_version() + '/' + 'bin'
+        driver_exists = False
+        for root, dirs, files in os.walk(output_path):
+            for file in files:
+                if file[:len(constants.GECKODRIVER)] == constants.GECKODRIVER:
+                    driver_exists = True
+
+        if not driver_exists:
+            output_path = self.download_release(self.latest_release_version(), extract=True)
+
         path = os.path.join(os.path.abspath(os.getcwd()), output_path)
         os.environ['PATH'] += os.pathsep + os.pathsep.join([path])
 

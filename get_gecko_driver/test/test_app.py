@@ -85,7 +85,7 @@ class TestApp:
     def test_download_latest_release_no_extract(self):
         release = latest_release
         subprocess.run(args=[name, '--download-latest'], stdout=subprocess.PIPE)
-        file_path = (constants.DIR_DOWNLOAD + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
+        file_path = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -96,7 +96,7 @@ class TestApp:
     def test_download_latest_release_extract(self):
         release = latest_release
         subprocess.run(args=[name, '--download-latest', '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (constants.DIR_DOWNLOAD + '/' + release + '/' + 'bin' + '/' + file_end)
+        file_path_extracted = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 
@@ -106,7 +106,7 @@ class TestApp:
     def test_download_random_release_no_extract(self):
         release = random_release
         subprocess.run(args=[name, '--download-release', release], stdout=subprocess.PIPE)
-        file_path = (constants.DIR_DOWNLOAD + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
+        file_path = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -117,7 +117,7 @@ class TestApp:
     def test_download_random_release_extract(self):
         release = random_release
         subprocess.run(args=[name, '--download-release', release, '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (constants.DIR_DOWNLOAD + '/' + release + '/' + 'bin' + '/' + file_end)
+        file_path_extracted = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 
@@ -136,6 +136,6 @@ class TestApp:
     def cleanup(self):
         yield
         try:
-            shutil.rmtree(constants.DIR_DOWNLOAD)
+            shutil.rmtree(constants.GECKODRIVER)
         except FileNotFoundError:
             pass
