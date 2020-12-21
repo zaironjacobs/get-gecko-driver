@@ -18,7 +18,6 @@ from .exceptions import UnknownPlatformError
 from .exceptions import ReleaseUrlError
 from .exceptions import UnknownReleaseError
 from .exceptions import DownloadError
-from .exceptions import FeatureNotImplementedError
 
 
 class GetGeckoDriver:
@@ -137,7 +136,7 @@ class GetGeckoDriver:
 
                 os.remove(output_path_with_file_name)
 
-                if pl.system() == 'Linux':
+                if pl.system() == 'Linux' or pl.system() == 'Darwin':
                     os.chmod(output_path_no_file_name + '/' + constants.GECKODRIVER, 0o755)
 
             return output_path_no_file_name
@@ -222,21 +221,3 @@ class GetGeckoDriver:
             if version[:1] == 'v':
                 all_versions[index] = version[1:]
         return all_versions
-
-    def __get_installed_firefox_version(self) -> str:
-        """ Return the installed Firefox version on the machine """
-
-        if pl.system() == 'Windows':
-            firefox_path = 'C:/Program Files/Mozilla Firefox/firefox.exe'
-            process = subprocess.Popen([firefox_path, '-v', '|', 'find "Mozilla"'],
-                                       stdout=subprocess.PIPE)
-            return process.communicate()[0].decode('UTF-8').split()[-1]
-
-        elif pl.system() == 'Linux':
-            process = subprocess.Popen(
-                ['firefox', '--version'],
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
-            return process.communicate()[0].decode('UTF-8').split()[-1]
-
-        elif pl.system() == 'Darwin':
-            raise FeatureNotImplementedError('feature has not been implemented for macOS yet')

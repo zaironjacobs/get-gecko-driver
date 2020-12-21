@@ -17,6 +17,3 @@ class UnknownReleaseError(GetGeckoDriverError):
 class DownloadError(GetGeckoDriverError):
     pass
 
-
-class FeatureNotImplementedError(GetGeckoDriverError):
-    pass
