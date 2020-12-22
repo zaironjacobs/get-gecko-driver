@@ -1,27 +1,17 @@
-from .platforms import Platforms
-
-platforms = Platforms()
-
 descriptor = '  {:<30} {}'
-message_help_required_platform = descriptor.format('', 'required: add one of the following platforms '
-                                                   + str(platforms.list))
-message_help_required_release = descriptor.format('', 'required: add a release version')
+message_help_required_version = descriptor.format('', 'required: add a version')
 message_help_optional_extract = descriptor.format('', 'optional: use --extract to extract the zip file')
 
 args_options = [
-    ['--latest-version', 'print the latest release version'],
-    ['--latest-urls', 'print latest release urls for all platforms'],
-    ['--release-url', 'print the url of a release for a platform' + '\n'
-     + message_help_required_platform + '\n'
-     + message_help_required_release],
-    ['--latest-url', 'print the latest release url for a platform' + '\n'
-     + message_help_required_platform],
-    ['--download-latest', 'download the latest release for a platform' + '\n'
-     + message_help_required_platform + '\n'
+    ['--latest-version', 'print the latest version'],
+    ['--latest-urls', 'print latest version urls for all platforms'],
+    ['--version-url', 'print the version url' + '\n'
+     + message_help_required_version],
+    ['--latest-url', 'print the latest version url for a platform' + '\n'],
+    ['--download-latest', 'download the latest version for a platform' + '\n'
      + message_help_optional_extract],
-    ['--download-release', 'download a specific release' + '\n'
-     + message_help_required_platform + '\n'
-     + message_help_required_release + '\n'
+    ['--download-version', 'download a specific version' + '\n'
+     + message_help_required_version + '\n'
      + message_help_optional_extract],
     ['--extract', 'extract the compressed driver file'],
     ['--version', 'program version'],

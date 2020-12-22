@@ -2,7 +2,7 @@ class GetGeckoDriverError(Exception):
     pass
 
 
-class ReleaseUrlError(GetGeckoDriverError):
+class VersionUrlError(GetGeckoDriverError):
     pass
 
 
@@ -10,7 +10,7 @@ class UnknownPlatformError(GetGeckoDriverError):
     pass
 
 
-class UnknownReleaseError(GetGeckoDriverError):
+class UnknownVersionError(GetGeckoDriverError):
     pass
 
 

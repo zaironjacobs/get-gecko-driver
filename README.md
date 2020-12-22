@@ -5,8 +5,8 @@ Get GeckoDriver
 [![PyPI - Status](https://img.shields.io/pypi/status/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
 [![PyPI - License](https://img.shields.io/pypi/l/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
 
-A tool to download and install GeckoDriver. Download the latest release or another specific release. You can use 
-this tool as a package import or as a command-line application.
+A tool to download and install GeckoDriver. Download the latest version or another specific version. You can use this
+tool as a package import or as a command-line application.
 
 ## Install
 
@@ -32,7 +32,7 @@ from get_gecko_driver import GetGeckoDriver
 from selenium import webdriver
 
 # Install the driver:
-# Downloads the latest GeckoDriver release
+# Downloads the latest GeckoDriver version
 # Adds the downloaded GeckoDriver to path
 get_driver = GetGeckoDriver()
 get_driver.install()
@@ -51,56 +51,56 @@ from get_gecko_driver import GetGeckoDriver
 
 get_driver = GetGeckoDriver()
 
-# Print the latest release version
-print(get_driver.latest_release_version())
+# Print the latest version
+print(get_driver.latest_version())
 
-# Print the latest release download link
-print(get_driver.latest_release_url())
+# Print the latest version download link
+print(get_driver.latest_version_url())
 
-# Print the download link of a specific release
-print(get_driver.release_url('0.27.0'))
+# Print the download link of a specific version
+print(get_driver.version_url('0.27.0'))
 
-# Download the latest driver release
+# Download the latest driver version
 # Optional: use output_path= to specify where to download the driver
 # Optional: use extract=True to extract the file
-get_driver.download_latest_release(extract=True)
+get_driver.download_latest_version(extract=True)
 
-# Download a specific driver release
+# Download a specific driver version
 # Optional: use output_path= to specify where to download the driver
 # Optional: use extract=True to extract the file
-get_driver.download_release('0.27.0', extract=True)
+get_driver.download_version('0.27.0', extract=True)
 ```
 
 #### Command-line
 
-Print the latest release url of all platforms:
+Print the latest version url of all platforms:
 
 ```console
 $ get-gecko-driver --latest-urls
 ```
 
-Print the latest release version:
+Print the latest version:
 
 ```console
 $ get-gecko-driver --latest-version
 ```
 
-Print the latest release url:
+Print the latest version url:
 
 ```console
 $ get-gecko-driver --latest-url
 ```
 
-Download the latest release and extract the file:
+Download the latest version and extract the file:
 
 ```console
 $ get-gecko-driver --download-latest --extract
 ```
 
-Download a specific release and extract the file:
+Download a specific version and extract the file:
 
 ```console
-$ get-gecko-driver --download-release 0.27.0 --extract
+$ get-gecko-driver --download-version 0.27.0 --extract
 ```
 
 #### The downloaded driver can be found at:
@@ -112,17 +112,17 @@ $ get-gecko-driver --download-release 0.27.0 --extract
 ```
 --help                      Show help.
 
---latest-version            Print the latest release version.
+--latest-version            Print the latest version.
 
---latest-urls               Print the latest release urls for all platforms.
+--latest-urls               Print the latest version urls for all platforms.
 
---release-url               Print the url of a release.
+--version-url               Print the version url.
 
---latest-url                Print the latest release url.
+--latest-url                Print the latest version url.
 
---download-latest           Download the latest release.
+--download-latest           Download the latest version.
 
---download-release          Download a specific release.
+--download-version          Download a specific version.
 
 --extract                   Extract the compressed driver file.
 

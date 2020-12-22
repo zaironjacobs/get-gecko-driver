@@ -3,7 +3,6 @@ import requests
 import zipfile
 import tarfile
 import platform as pl
-import subprocess
 import struct
 from bs4 import BeautifulSoup
 
@@ -15,8 +14,8 @@ from .platforms import Platforms
 from . import retriever
 from .exceptions import GetGeckoDriverError
 from .exceptions import UnknownPlatformError
-from .exceptions import ReleaseUrlError
-from .exceptions import UnknownReleaseError
+from .exceptions import VersionUrlError
+from .exceptions import UnknownVersionError
 from .exceptions import DownloadError
 
 
@@ -34,30 +33,30 @@ class GetGeckoDriver:
         else:
             self.__platform = self.__check_platform(platform)
 
-    def latest_release_version(self) -> str:
-        """ Return the latest release version """
+    def latest_version(self) -> str:
+        """ Return the latest version """
 
-        result = requests.get(constants.GITHUB_GECKODRIVER_RELEASES_URL)
+        result = requests.get(constants.GITHUB_GECKODRIVER_VERSION_URL)
 
         if result.status_code != 200:
-            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_RELEASES_URL)
+            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_VERSION_URL)
 
         soup = BeautifulSoup(result.content, 'html.parser')
-        anchor = soup.select_one(constants.GITHUB_GECKODRIVER_LATEST_RELEASE_ANCHOR)
-        release = anchor.text
+        anchor = soup.select_one(constants.GITHUB_GECKODRIVER_LATEST_VERSION_ANCHOR)
+        version = anchor.text
 
-        self.__check_release(release)
-        return release
+        self.__check_version(version)
+        return version
 
-    def latest_release_url(self) -> str:
-        """ Return the latest release url """
+    def latest_version_url(self) -> str:
+        """ Return the latest version url """
 
-        return self.release_url(self.latest_release_version())
+        return self.version_url(self.latest_version())
 
-    def release_url(self, release) -> str:
-        """ Return the release download url """
+    def version_url(self, version) -> str:
+        """ Return the version download url """
 
-        self.__check_release(release)
+        self.__check_version(version)
 
         arch = struct.calcsize('P') * 8
         arch_64 = 64
@@ -67,14 +66,14 @@ class GetGeckoDriver:
             # 64bit
             if arch == arch_64:
                 try:
-                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.win_64)
+                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.win_64)
                            + constants.ZIP_TYPE)
                     self.__check_url(url)
                     return url
-                except ReleaseUrlError:
+                except VersionUrlError:
                     pass
             # 32bit
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.win_32)
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.win_32)
                    + constants.ZIP_TYPE)
             self.__check_url(url)
             return url
@@ -84,90 +83,81 @@ class GetGeckoDriver:
             # 64bit
             if arch == arch_64:
                 try:
-                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.linux_64)
+                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.linux_64)
                            + constants.TAR_GZ_TYPE)
                     self.__check_url(url)
                     return url
-                except ReleaseUrlError:
+                except VersionUrlError:
                     pass
             # 32bit
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.linux_32)
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.linux_32)
                    + constants.TAR_GZ_TYPE)
             self.__check_url(url)
             return url
 
         elif self.__platform == self.__platforms.macos:
 
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(release, release, self.__platforms.macos)
+            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.macos)
                    + constants.TAR_GZ_TYPE)
             self.__check_url(url)
             return url
 
-    def download_latest_release(self, output_path=None, extract=False) -> None:
-        """ Download the latest geckodriver release """
+    def download_latest_version(self, output_path=None, extract=False) -> None:
+        """ Download the latest geckodriver version """
 
-        release = self.latest_release_version()
-        self.download_release(release, output_path, extract)
+        version = self.latest_version()
+        self.download_version(version, output_path, extract)
 
-    def download_release(self, release, output_path=None, extract=False) -> str:
-        """ Download a geckodriver release """
+    def download_version(self, version, path=None, extract=False) -> str:
+        """ Download a geckodriver version """
 
-        self.__check_release(release)
+        self.__check_version(version)
 
-        if not output_path:
-            path = self._create_output_path_str(release)
-        else:
-            path = output_path
+        if not path:
+            path = self._default_output_path_str(version)
 
+        # If the driver file already exists, return the dir path of the driver file
         for root, dirs, files in os.walk(path):
             for file in files:
                 if (file.lower() == constants.GECKODRIVER.lower() or
                         file.lower() == constants.GECKODRIVER.lower() + '.exe'):
                     return path
 
-        def download(download_url, download_path, extract_type) -> str:
+        def download(download_url, download_path) -> str:
             try:
                 output_path_with_file_name, file_name = retriever.download(url=download_url, output_path=download_path)
             except (OSError, HTTPError, RequestException) as err:
                 raise DownloadError(err)
-
             if extract:
-                if extract_type == constants.ZIP_TYPE:
+                if self.__platform == self.__platforms.win:
                     with zipfile.ZipFile(output_path_with_file_name, 'r') as zip_ref:
                         zip_ref.extractall(path=download_path)
-                elif extract_type == constants.TAR_GZ_TYPE:
-                    with tarfile.open(output_path_with_file_name, "r:gz") as tar_gz_ref:
+                else:
+                    with tarfile.open(output_path_with_file_name, 'r:gz') as tar_gz_ref:
                         tar_gz_ref.extractall(path=download_path)
-
                 os.remove(output_path_with_file_name)
-
                 if self.__platform == self.__platforms.linux or self.__platform == self.__platforms.macos:
                     os.chmod(download_path + '/' + constants.GECKODRIVER, 0o755)
-
             return download_path
 
-        url = self.release_url(release)
-
         # Download the driver file and return the dir path of the driver file
-        if self.__platform == self.__platforms.win:
-            return download(url, path, constants.ZIP_TYPE)
-        else:
-            return download(url, path, constants.TAR_GZ_TYPE)
+        url = self.version_url(version)
+        return download(url, path)
 
     def __check_url(self, url) -> None:
         """ Check if url is valid """
 
         if requests.head(url).status_code != 302:
-            raise ReleaseUrlError('Error: Invalid url (Possible cause: non-existent release version)')
+            raise VersionUrlError('Error: Invalid url (Possible cause: non-existent version version)')
 
-    def __check_release(self, release) -> None:
-        """ Check if release format is valid """
+    def __check_version(self, version) -> None:
+        """ Check if version format is valid """
 
-        split_release = release.split('.')
+        split_version = version.split('.')
 
-        for number in split_release:
+        for number in split_version:
             if not number.isnumeric():
-                raise UnknownReleaseError('Error: Invalid release format')
+                raise UnknownVersionError('Error: Invalid version format')
 
     def __check_platform(self, platform) -> str:
         """ Check if platform is valid """
@@ -178,9 +168,9 @@ class GetGeckoDriver:
         return platform
 
     def install(self) -> None:
-        """ Install the latest GeckoDriver release """
+        """ Install the latest GeckoDriver version """
 
-        output_path = self.download_release(self.latest_release_version(), extract=True)
+        output_path = self.download_version(self.latest_version(), extract=True)
         path = os.path.join(os.path.abspath(os.getcwd()), output_path)
         os.environ['PATH'] += os.pathsep + os.pathsep.join([path])
 
@@ -218,7 +208,7 @@ class GetGeckoDriver:
                 all_versions[index] = version[1:]
         return all_versions
 
-    def _create_output_path_str(self, release) -> str:
+    def _default_output_path_str(self, version) -> str:
         """ Return the default output path """
 
-        return constants.GECKODRIVER + '/' + release + '/' + 'bin'
+        return constants.GECKODRIVER + '/' + version + '/' + 'bin'

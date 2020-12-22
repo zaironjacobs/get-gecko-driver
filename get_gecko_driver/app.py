@@ -35,7 +35,7 @@ class App:
         self.__msg_download_finished = 'download finished'
         self.__msg_required_choose_platform = (self.__c_fore.RED + 'required: choose one of the following platforms: '
                                                + str(self.__platforms.list) + self.__c_style.RESET_ALL)
-        self.__msg_required_add_release = (self.__c_fore.RED + 'required: add a release version'
+        self.__msg_required_add_version = (self.__c_fore.RED + 'required: add a version'
                                            + self.__c_style.RESET_ALL)
         self.__msg_optional_add_extract = 'optional: add --extract to extract the zip file'
         self.__msg_error_unrecognized_argument = (
@@ -43,10 +43,10 @@ class App:
                 + '\n' + 'tip: use --help to see all available arguments')
         self.__msg_download_error = (self.__c_fore.RED + 'error: an error occurred at downloading'
                                      + self.__c_style.RESET_ALL)
-        self.__msg_release_url_error = (self.__c_fore.RED + 'error: could not find release url'
+        self.__msg_version_url_error = (self.__c_fore.RED + 'error: could not find version url'
                                         + self.__c_style.RESET_ALL)
-        self.__msg_no_latest_release_url_error = (self.__c_fore.RED
-                                                  + 'error: could not find the latest release version'
+        self.__msg_no_latest_version_url_error = (self.__c_fore.RED
+                                                  + 'error: could not find the latest version'
                                                   + self.__c_style.RESET_ALL)
         self.__msg_not_found_error = (self.__c_fore.RED + 'not found'
                                       + self.__c_style.RESET_ALL)
@@ -94,14 +94,14 @@ class App:
             sys.exit(0)
 
         ###############
-        # RELEASE URL #
+        # VERSION URL #
         ###############
-        self.__arg_release_url = self.__args.release_url
-        if self.__arg_passed(self.__arg_release_url):
-            if len(self.__arg_release_url) < 1:
-                print(self.__msg_required_add_release)
+        self.__arg_version_url = self.__args.version_url
+        if self.__arg_passed(self.__arg_version_url):
+            if len(self.__arg_version_url) < 1:
+                print(self.__msg_required_add_version)
             else:
-                self.__print_release_url(self.__arg_release_url[0])
+                self.__print_version_url(self.__arg_version_url[0])
             sys.exit(0)
 
         ##############
@@ -121,24 +121,24 @@ class App:
             self.__arg_extract = self.__args.extract
             if self.__arg_passed(self.__arg_extract):
                 extract = True
-            self.__download_latest_release(extract)
+            self.__download_latest_version(extract)
 
         ####################
-        # DOWNLOAD RELEASE #
+        # DOWNLOAD VERSION #
         ####################
-        self.__arg_download_release = self.__args.download_release
-        if self.__arg_passed(self.__arg_download_release):
+        self.__arg_download_version = self.__args.download_version
+        if self.__arg_passed(self.__arg_download_version):
             extract = False
             self.__arg_extract = self.__args.extract
             if self.__arg_passed(self.__arg_extract):
                 extract = True
-            if len(self.__arg_download_release) < 1:
-                print(self.__msg_required_add_release)
+            if len(self.__arg_download_version) < 1:
+                print(self.__msg_required_add_version)
                 print(self.__msg_optional_add_extract)
                 sys.exit(0)
             else:
-                release = self.__arg_download_release[0]
-                self.__download_release(release, extract)
+                version = self.__arg_download_version[0]
+                self.__download_version(version, extract)
             sys.exit(0)
 
         ###########
@@ -157,7 +157,7 @@ class App:
         return False
 
     def __print_latest_urls(self) -> None:
-        """ Print the latest url release for all platforms """
+        """ Print the latest url version for all platforms """
 
         get_driver_win = GetGeckoDriver(self.__platforms.win)
         get_driver_linux = GetGeckoDriver(self.__platforms.linux)
@@ -165,11 +165,11 @@ class App:
         drivers = {'Windows': get_driver_win, 'Linux': get_driver_linux, 'macOS': get_driver_macos}
 
         for index, (key, value) in enumerate(drivers.items()):
-            print('Latest release for ' + key + ': ')
+            print('Latest version for ' + key + ': ')
             try:
-                print('latest: ' + value.latest_release_url())
+                print('latest: ' + value.latest_version_url())
             except GetGeckoDriverError:
-                print(self.__msg_no_latest_release_url_error)
+                print(self.__msg_no_latest_version_url_error)
 
             if index < len(drivers) - 1:
                 print('')
@@ -178,40 +178,40 @@ class App:
         """ Print the latest version """
 
         try:
-            print(self.__get_driver.latest_release_version())
+            print(self.__get_driver.latest_version())
         except GetGeckoDriverError:
-            print(self.__msg_no_latest_release_url_error)
+            print(self.__msg_no_latest_version_url_error)
 
     def __print_latest_url(self) -> None:
-        """ Print the url of the latest release """
+        """ Print the url of the latest version """
 
         try:
-            print(self.__get_driver.latest_release_url())
+            print(self.__get_driver.latest_version_url())
         except GetGeckoDriverError:
-            print(self.__msg_release_url_error)
+            print(self.__msg_version_url_error)
 
-    def __print_release_url(self, release) -> None:
+    def __print_version_url(self, version) -> None:
         """ Print the url for a given version """
 
         try:
-            print(self.__get_driver.release_url(release))
+            print(self.__get_driver.version_url(version))
         except GetGeckoDriverError:
-            print(self.__msg_release_url_error)
+            print(self.__msg_version_url_error)
 
-    def __download_latest_release(self, extract) -> None:
-        """ Download the latest release """
+    def __download_latest_version(self, extract) -> None:
+        """ Download the latest version """
 
         try:
-            self.__get_driver.download_latest_release(extract=extract)
+            self.__get_driver.download_latest_version(extract=extract)
             print(self.__msg_download_finished)
         except GetGeckoDriverError:
             print(self.__msg_download_error)
 
-    def __download_release(self, release, extract) -> None:
-        """ Download the release of a given version """
+    def __download_version(self, version, extract) -> None:
+        """ Download the version of a given version """
 
         try:
-            self.__get_driver.download_release(release, extract=extract)
+            self.__get_driver.download_version(version, extract=extract)
             print(self.__msg_download_finished)
         except GetGeckoDriverError:
             print(self.__msg_download_error)
