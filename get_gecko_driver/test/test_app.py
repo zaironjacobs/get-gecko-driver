@@ -7,6 +7,7 @@ from os import path
 
 from decouple import config
 
+from .. import GetGeckoDriver
 from .. import constants
 from .. import __version__
 from ..platforms import Platforms
@@ -83,9 +84,10 @@ class TestApp:
     # DOWNLOAD LATEST RELEASE - NO EXTRACT #
     ########################################
     def test_download_latest_release_no_extract(self):
+        get_driver = GetGeckoDriver()
         release = latest_release
         subprocess.run(args=[name, '--download-latest'], stdout=subprocess.PIPE)
-        file_path = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
+        file_path = (get_driver._create_output_path_str(release) + '/' + 'geckodriver-v' + release + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -94,9 +96,10 @@ class TestApp:
     # DOWNLOAD LATEST RELEASE - EXTRACTED #
     #######################################
     def test_download_latest_release_extract(self):
+        get_driver = GetGeckoDriver()
         release = latest_release
         subprocess.run(args=[name, '--download-latest', '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + file_end)
+        file_path_extracted = (get_driver._create_output_path_str(release) + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 
@@ -104,9 +107,10 @@ class TestApp:
     # DOWNLOAD RANDOM RELEASE - NO EXTRACT #
     ########################################
     def test_download_random_release_no_extract(self):
+        get_driver = GetGeckoDriver()
         release = random_release
         subprocess.run(args=[name, '--download-release', release], stdout=subprocess.PIPE)
-        file_path = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + 'geckodriver-v' + release + '-'
+        file_path = (get_driver._create_output_path_str(release) + '/' + 'geckodriver-v' + release + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -115,9 +119,10 @@ class TestApp:
     # DOWNLOAD RANDOM RELEASE - EXTRACTED #
     #######################################
     def test_download_random_release_extract(self):
+        get_driver = GetGeckoDriver()
         release = random_release
         subprocess.run(args=[name, '--download-release', release, '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (constants.GECKODRIVER + '/' + release + '/' + 'bin' + '/' + file_end)
+        file_path_extracted = (get_driver._create_output_path_str(release) + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 

@@ -114,40 +114,45 @@ class GetGeckoDriver:
 
         self.__check_release(release)
 
-        def download(url_download, extract_type) -> str:
-            if output_path is None:
-                output_path_no_file_name = constants.GECKODRIVER + '/' + release + '/bin'
-            else:
-                output_path_no_file_name = output_path
+        if not output_path:
+            path = self._create_output_path_str(release)
+        else:
+            path = output_path
 
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if (file.lower() == constants.GECKODRIVER.lower() or
+                        file.lower() == constants.GECKODRIVER.lower() + '.exe'):
+                    return path
+
+        def download(download_url, download_path, extract_type) -> str:
             try:
-                output_path_with_file_name, file_name = retriever.download(url=url_download,
-                                                                           output_path=output_path_no_file_name)
+                output_path_with_file_name, file_name = retriever.download(url=download_url, output_path=download_path)
             except (OSError, HTTPError, RequestException) as err:
                 raise DownloadError(err)
 
             if extract:
                 if extract_type == constants.ZIP_TYPE:
                     with zipfile.ZipFile(output_path_with_file_name, 'r') as zip_ref:
-                        zip_ref.extractall(path=output_path_no_file_name)
+                        zip_ref.extractall(path=download_path)
                 elif extract_type == constants.TAR_GZ_TYPE:
                     with tarfile.open(output_path_with_file_name, "r:gz") as tar_gz_ref:
-                        tar_gz_ref.extractall(path=output_path_no_file_name)
+                        tar_gz_ref.extractall(path=download_path)
 
                 os.remove(output_path_with_file_name)
 
-                if pl.system() == 'Linux' or pl.system() == 'Darwin':
-                    os.chmod(output_path_no_file_name + '/' + constants.GECKODRIVER, 0o755)
+                if self.__platform == self.__platforms.linux or self.__platform == self.__platforms.macos:
+                    os.chmod(download_path + '/' + constants.GECKODRIVER, 0o755)
 
-            return output_path_no_file_name
+            return download_path
 
         url = self.release_url(release)
+
+        # Download the driver file and return the dir path of the driver file
         if self.__platform == self.__platforms.win:
-            return download(url, constants.ZIP_TYPE)
-        elif self.__platform == self.__platforms.linux:
-            return download(url, constants.TAR_GZ_TYPE)
-        elif self.__platform == self.__platforms.macos:
-            return download(url, constants.TAR_GZ_TYPE)
+            return download(url, path, constants.ZIP_TYPE)
+        else:
+            return download(url, path, constants.TAR_GZ_TYPE)
 
     def __check_url(self, url) -> None:
         """ Check if url is valid """
@@ -175,16 +180,7 @@ class GetGeckoDriver:
     def install(self) -> None:
         """ Install the latest GeckoDriver release """
 
-        output_path = constants.GECKODRIVER + '/' + self.latest_release_version() + '/' + 'bin'
-        driver_exists = False
-        for root, dirs, files in os.walk(output_path):
-            for file in files:
-                if file[:len(constants.GECKODRIVER)] == constants.GECKODRIVER:
-                    driver_exists = True
-
-        if not driver_exists:
-            output_path = self.download_release(self.latest_release_version(), extract=True)
-
+        output_path = self.download_release(self.latest_release_version(), extract=True)
         path = os.path.join(os.path.abspath(os.getcwd()), output_path)
         os.environ['PATH'] += os.pathsep + os.pathsep.join([path])
 
@@ -221,3 +217,8 @@ class GetGeckoDriver:
             if version[:1] == 'v':
                 all_versions[index] = version[1:]
         return all_versions
+
+    def _create_output_path_str(self, release) -> str:
+        """ Return the default output path """
+
+        return constants.GECKODRIVER + '/' + release + '/' + 'bin'
