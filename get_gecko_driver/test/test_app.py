@@ -51,7 +51,7 @@ class TestApp:
     ##################
     # LATEST VERSION #
     ##################
-    def test_latest_latest_version_version(self):
+    def test_latest_latest_version(self):
         out = subprocess.run(args=[name, '--latest-version'],
                              universal_newlines=True,
                              stdout=subprocess.PIPE)

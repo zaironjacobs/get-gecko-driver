@@ -148,7 +148,7 @@ class GetGeckoDriver:
         """ Check if url is valid """
 
         if requests.head(url).status_code != 302:
-            raise VersionUrlError('Error: Invalid url (Possible cause: non-existent version version)')
+            raise VersionUrlError('Error: Invalid url (Possible cause: non-existent version)')
 
     def __check_version(self, version) -> None:
         """ Check if version format is valid """
