@@ -3,10 +3,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[packages]
+[dev-packages]
 pytest = "*"
 
-[dev-packages]
+[packages]
 bs4 = "*"
 requests = "*"
 colorama = "*"
