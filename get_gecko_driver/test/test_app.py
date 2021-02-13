@@ -87,7 +87,7 @@ class TestApp:
         get_driver = GetGeckoDriver()
         version = latest_version
         subprocess.run(args=[name, '--download-latest'], stdout=subprocess.PIPE)
-        file_path = (get_driver._default_output_path_str(version) + '/' + 'geckodriver-v' + version + '-'
+        file_path = (get_driver._default_output_path(version) + '/' + 'geckodriver-v' + version + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -99,7 +99,7 @@ class TestApp:
         get_driver = GetGeckoDriver()
         version = latest_version
         subprocess.run(args=[name, '--download-latest', '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (get_driver._default_output_path_str(version) + '/' + file_end)
+        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 
@@ -110,7 +110,7 @@ class TestApp:
         get_driver = GetGeckoDriver()
         version = random_version
         subprocess.run(args=[name, '--download-version', version], stdout=subprocess.PIPE)
-        file_path = (get_driver._default_output_path_str(version) + '/' + 'geckodriver-v' + version + '-'
+        file_path = (get_driver._default_output_path(version) + '/' + 'geckodriver-v' + version + '-'
                      + file_end_compressed)
         result = path.exists(file_path)
         assert result
@@ -122,7 +122,7 @@ class TestApp:
         get_driver = GetGeckoDriver()
         version = random_version
         subprocess.run(args=[name, '--download-version', version, '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (get_driver._default_output_path_str(version) + '/' + file_end)
+        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_end)
         result = path.exists(file_path_extracted)
         assert result
 

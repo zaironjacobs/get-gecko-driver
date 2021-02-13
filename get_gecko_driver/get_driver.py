@@ -113,15 +113,17 @@ class GetGeckoDriver:
 
         self.__check_version(version)
 
-        if not path:
-            path = self._default_output_path_str(version)
+        if len(str(path)) == 0:
+            # on path == '',
+            # ChromeDriver will be downloaded in the current dir
+            path = ''
+        elif not path:
+            # on path == None,
+            # GeckoDriver will be downloaded at e.g. geckodriver/0.29.0/bin/geckodriver.exe
+            path = self._default_output_path(version)
 
-        # If the driver file already exists, return the dir path of the driver file
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if (file.lower() == constants.GECKODRIVER.lower() or
-                        file.lower() == constants.GECKODRIVER.lower() + '.exe'):
-                    return path
+        # on path == webdriver/bin (or any other dir name),
+        # GeckoDriver will be downloaded at webdriver/bin/geckodriver.exe
 
         def download(download_url, download_path) -> str:
             try:
@@ -208,7 +210,7 @@ class GetGeckoDriver:
                 all_versions[index] = version[1:]
         return all_versions
 
-    def _default_output_path_str(self, version) -> str:
+    def _default_output_path(self, version) -> str:
         """ Return the default output path """
 
         return constants.GECKODRIVER + '/' + version + '/' + 'bin'
