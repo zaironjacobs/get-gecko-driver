@@ -122,6 +122,7 @@ class App:
             if self.__arg_passed(self.__arg_extract):
                 extract = True
             self.__download_latest_version(extract)
+            sys.exit(0)
 
         ####################
         # DOWNLOAD VERSION #
