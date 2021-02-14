@@ -21,22 +21,22 @@ latest_version = config('LATEST_VERSION')
 random_version = config('RANDOM_VERSION')
 
 if pl.system() == 'Windows':
-    file_end = 'geckodriver.exe'
-    file_end_compressed = 'win64.zip'
+    file_name = 'geckodriver.exe'
+    file_name_compressed = 'win64.zip'
     latest_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(latest_version, latest_version, platforms.win_64
                                                                    + '.zip')
     random_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(random_version, random_version, platforms.win_64
                                                                    + '.zip')
 elif pl.system() == 'Linux':
-    file_end = 'geckodriver'
-    file_end_compressed = 'linux64.tar.gz'
+    file_name = 'geckodriver'
+    file_name_compressed = 'linux64.tar.gz'
     latest_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(latest_version, latest_version, platforms.linux_64
                                                                    + '.tar.gz')
     random_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(random_version, random_version, platforms.linux_64
                                                                    + '.tar.gz')
 elif pl.system() == 'Darwin':
-    file_end = 'geckodriver'
-    file_end_compressed = 'macos.tar.gz'
+    file_name = 'geckodriver'
+    file_name_compressed = 'macos.tar.gz'
     latest_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(latest_version, latest_version, platforms.macos
                                                                    + '.tar.gz')
     random_version_url = constants.GECKODRIVER_DOWNLOAD_URL.format(random_version, random_version, platforms.macos
@@ -88,19 +88,28 @@ class TestApp:
         version = latest_version
         subprocess.run(args=[name, '--download-latest'], stdout=subprocess.PIPE)
         file_path = (get_driver._default_output_path(version) + '/' + 'geckodriver-v' + version + '-'
-                     + file_end_compressed)
+                     + file_name_compressed)
         result = path.exists(file_path)
         assert result
 
-    #######################################
-    # DOWNLOAD LATEST VERSION - EXTRACTED #
-    #######################################
+    #####################################
+    # DOWNLOAD LATEST VERSION - EXTRACT #
+    #####################################
     def test_download_latest_version_extract(self):
         get_driver = GetGeckoDriver()
         version = latest_version
         subprocess.run(args=[name, '--download-latest', '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_end)
+        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_name)
         result = path.exists(file_path_extracted)
+        assert result
+
+    ##########################################################
+    # LATEST VERSION DOWNLOAD - EXTRACT AND WITH CUSTOM PATH #
+    ##########################################################
+    def test_download_latest_version_extract_custom_path(self):
+        get_driver = GetGeckoDriver()
+        get_driver.download_latest_version(output_path='webdriver/bin/geckodriver', extract=True)
+        result = path.exists('webdriver/bin/geckodriver/' + file_name)
         assert result
 
     ########################################
@@ -111,19 +120,29 @@ class TestApp:
         version = random_version
         subprocess.run(args=[name, '--download-version', version], stdout=subprocess.PIPE)
         file_path = (get_driver._default_output_path(version) + '/' + 'geckodriver-v' + version + '-'
-                     + file_end_compressed)
+                     + file_name_compressed)
         result = path.exists(file_path)
         assert result
 
-    #######################################
-    # DOWNLOAD RANDOM VERSION - EXTRACTED #
-    #######################################
+    #####################################
+    # DOWNLOAD RANDOM VERSION - EXTRACT #
+    #####################################
     def test_download_random_version_extract(self):
         get_driver = GetGeckoDriver()
         version = random_version
         subprocess.run(args=[name, '--download-version', version, '--extract'], stdout=subprocess.PIPE)
-        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_end)
+        file_path_extracted = (get_driver._default_output_path(version) + '/' + file_name)
         result = path.exists(file_path_extracted)
+        assert result
+
+    ##########################################################
+    # RANDOM VERSION DOWNLOAD - EXTRACT AND WITH CUSTOM PATH #
+    ##########################################################
+    def test_download_random_version_extract_custom_path(self):
+        get_driver = GetGeckoDriver()
+        version = random_version
+        get_driver.download_version(version, output_path='webdriver/bin/geckodriver', extract=True)
+        result = path.exists('webdriver/bin/geckodriver/' + file_name)
         assert result
 
     ###########
@@ -142,5 +161,6 @@ class TestApp:
         yield
         try:
             shutil.rmtree(constants.GECKODRIVER)
+            shutil.rmtree(constants.WEBDRIVER)
         except FileNotFoundError:
             pass

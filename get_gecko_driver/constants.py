@@ -8,3 +8,4 @@ ZIP_TYPE = '.zip'
 TAR_GZ_TYPE = '.tar.gz'
 
 GECKODRIVER = 'geckodriver'
+WEBDRIVER = 'webdriver'

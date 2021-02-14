@@ -108,19 +108,19 @@ class GetGeckoDriver:
         version = self.latest_version()
         self.download_version(version, output_path, extract)
 
-    def download_version(self, version, path=None, extract=False) -> str:
+    def download_version(self, version, output_path=None, extract=False) -> str:
         """ Download a geckodriver version """
 
         self.__check_version(version)
 
-        if len(str(path)) == 0:
+        if len(str(output_path)) == 0:
             # on path == '',
             # ChromeDriver will be downloaded in the current dir
-            path = ''
-        elif not path:
+            output_path = ''
+        elif not output_path:
             # on path == None,
             # GeckoDriver will be downloaded at e.g. geckodriver/0.29.0/bin/geckodriver.exe
-            path = self._default_output_path(version)
+            output_path = self._default_output_path(version)
 
         # on path == webdriver/bin (or any other dir name),
         # GeckoDriver will be downloaded at webdriver/bin/geckodriver.exe
@@ -144,7 +144,7 @@ class GetGeckoDriver:
 
         # Download the driver file and return the dir path of the driver file
         url = self.version_url(version)
-        return download(url, path)
+        return download(url, output_path)
 
     def __check_url(self, url) -> None:
         """ Check if url is valid """
