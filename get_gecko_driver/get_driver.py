@@ -142,7 +142,7 @@ class GetGeckoDriver:
                     os.chmod(download_path + '/' + constants.GECKODRIVER, 0o755)
             return download_path
 
-        # Download the driver file and return the dir path of the driver file
+        # Download the driver file and return the relative dir path of the driver file
         url = self.version_url(version)
         return download(url, output_path)
 
