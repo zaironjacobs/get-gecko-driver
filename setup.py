@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 name = 'get-gecko-driver'
-version = '0.1.16'
+version = '0.1.17'
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
@@ -11,7 +11,7 @@ requires = [
     'bs4>=0.0.1',
     'requests>=2.25.0',
     'colorama>=0.4.4',
-    'urllib3>=1.26.2'
+    'urllib3>=1.26.4'
 ]
 
 setup(
