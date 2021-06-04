@@ -1,3 +1,3 @@
-__version__ = '0.1.17'
+__version__ = '1.3'
 
 from .get_driver import GetGeckoDriver
