@@ -8,6 +8,8 @@ Get GeckoDriver
 A tool to download and install GeckoDriver. Download the latest version or another specific version. You can use this
 tool as a package import or as a command-line application.
 
+This Python package runs through a Jenkins test pipeline every hour to ensure proper functionality.
+
 ## Install
 
 To install:
