@@ -37,10 +37,8 @@ class GetGeckoDriver:
         """ Return the latest version """
 
         result = requests.get(constants.GITHUB_GECKODRIVER_VERSION_URL)
-
         if result.status_code != 200:
             raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_VERSION_URL)
-
         soup = BeautifulSoup(result.content, 'html.parser')
         anchor = soup.select_one(constants.GITHUB_GECKODRIVER_LATEST_VERSION_ANCHOR)
         version = anchor.text
