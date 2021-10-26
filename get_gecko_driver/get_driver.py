@@ -158,7 +158,11 @@ class GetGeckoDriver:
         return download(url, output_path)
 
     def __check_url(self, url):
-        """ Check if url is valid """
+        """
+        Check if url is valid
+
+        :param url: The driver download url
+        """
 
         if requests.head(url).status_code != 302:
             raise VersionUrlError('Error: Invalid url (Possible cause: non-existent version)')
