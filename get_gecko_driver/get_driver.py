@@ -11,6 +11,7 @@ from requests.exceptions import HTTPError
 
 from .platforms import Platforms
 from . import retriever
+from . import constants
 from .exceptions import GetGeckoDriverError
 from .exceptions import UnknownPlatformError
 from .exceptions import VersionUrlError
@@ -35,13 +36,11 @@ class GetGeckoDriver:
     def latest_version(self) -> str:
         """ Return the latest version """
 
-        url_geckodriver_releases = 'https://github.com/mozilla/geckodriver/releases'
-        result = requests.get(url_geckodriver_releases)
+        result = requests.get(constants.url_geckodriver_releases)
         if not result.ok:
-            raise GetGeckoDriverError('error: could not get ' + url_geckodriver_releases)
+            raise GetGeckoDriverError('error: could not get ' + constants.url_geckodriver_releases)
         soup = BeautifulSoup(result.content, 'html.parser')
-        css_selector_latest_version = 'div.flex-md-row:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h1:nth-child(1) > a:nth-child(1)'
-        anchor = soup.select_one(css_selector_latest_version)
+        anchor = soup.select_one(constants.css_selector_latest_version)
         version = anchor.text.strip()
         self.__check_version(version)
         return version
@@ -60,7 +59,6 @@ class GetGeckoDriver:
 
         self.__check_version(version)
         arch = struct.calcsize('P') * 8
-        url_download = 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-{}'
         zip_ext = '.zip'
         tar_gz_ext = '.tar.gz'
 
@@ -68,14 +66,14 @@ class GetGeckoDriver:
             # 64bit
             if arch == 64:
                 try:
-                    url = url_download.format(version, version, self.__platforms.win_64) + zip_ext
+                    url = constants.url_download.format(version, version, self.__platforms.win_64) + zip_ext
                     self.__check_url(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = url_download.format(version, version, self.__platforms.win_32) + zip_ext
+            url = constants.url_download.format(version, version, self.__platforms.win_32) + zip_ext
             self.__check_url(url)
             return url
 
@@ -83,14 +81,14 @@ class GetGeckoDriver:
             # 64bit
             if arch == 64:
                 try:
-                    url = url_download.format(version, version, self.__platforms.linux_64) + tar_gz_ext
+                    url = constants.url_download.format(version, version, self.__platforms.linux_64) + tar_gz_ext
                     self.__check_url(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = url_download.format(version, version, self.__platforms.linux_32) + tar_gz_ext
+            url = constants.url_download.format(version, version, self.__platforms.linux_32) + tar_gz_ext
             self.__check_url(url)
             return url
 
@@ -98,14 +96,15 @@ class GetGeckoDriver:
             # 64bit
             if arch == 64:
                 try:
-                    url = url_download.format(version, version, self.__platforms.macos) + '-aarch64' + tar_gz_ext
+                    url = constants.url_download.format(version, version,
+                                                        self.__platforms.macos) + '-aarch64' + tar_gz_ext
                     self.__check_url(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = url_download.format(version, version, self.__platforms.macos) + tar_gz_ext
+            url = constants.url_download.format(version, version, self.__platforms.macos) + tar_gz_ext
             self.__check_url(url)
             return url
 
@@ -201,17 +200,15 @@ class GetGeckoDriver:
     def __get_all_geckodriver_versions(self) -> list:
         """ Return a list with all GeckoDriver versions """
 
-        url_github_geckodriver_tags = 'https://github.com/mozilla/geckodriver/tags'
-
         def find_versions(param=None):
             if not param:
-                url = url_github_geckodriver_tags
+                url = constants.url_github_geckodriver_tags
             else:
-                url = url_github_geckodriver_tags + param
+                url = constants.url_github_geckodriver_tags + param
 
             response = requests.get(url)
             if not response.ok:
-                raise GetGeckoDriverError('error: could not get ' + url_github_geckodriver_tags)
+                raise GetGeckoDriverError('error: could not get ' + constants.url_github_geckodriver_tags)
             soup = BeautifulSoup(response.content, 'html.parser')
             box = soup.select_one('div.Box:nth-child(2)')
 

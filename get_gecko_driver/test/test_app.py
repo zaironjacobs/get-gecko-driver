@@ -10,6 +10,7 @@ from decouple import config
 from .. import GetGeckoDriver
 from .. import __version__
 from ..platforms import Platforms
+from .. import constants
 
 name = 'get-gecko-driver'
 geckodriver = 'geckodriver'
@@ -19,23 +20,21 @@ platforms = Platforms()
 latest_version = config('LATEST_VERSION')
 random_version = config('RANDOM_VERSION')
 
-url_download = 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-{}'
-
 if pl.system() == 'Windows':
     file_name = 'geckodriver.exe'
     file_name_compressed = 'win64.zip'
-    latest_version_url = url_download.format(latest_version, latest_version, platforms.win_64 + '.zip')
-    random_version_url = url_download.format(random_version, random_version, platforms.win_64 + '.zip')
+    latest_version_url = constants.url_download.format(latest_version, latest_version, platforms.win_64 + '.zip')
+    random_version_url = constants.url_download.format(random_version, random_version, platforms.win_64 + '.zip')
 elif pl.system() == 'Linux':
     file_name = 'geckodriver'
     file_name_compressed = 'linux64.tar.gz'
-    latest_version_url = url_download.format(latest_version, latest_version, platforms.linux_64 + '.tar.gz')
-    random_version_url = url_download.format(random_version, random_version, platforms.linux_64 + '.tar.gz')
+    latest_version_url = constants.url_download.format(latest_version, latest_version, platforms.linux_64 + '.tar.gz')
+    random_version_url = constants.url_download.format(random_version, random_version, platforms.linux_64 + '.tar.gz')
 elif pl.system() == 'Darwin':
     file_name = 'geckodriver'
     file_name_compressed = 'macos.tar.gz'
-    latest_version_url = url_download.format(latest_version, latest_version, platforms.macos + '.tar.gz')
-    random_version_url = url_download.format(random_version, random_version, platforms.macos + '.tar.gz')
+    latest_version_url = constants.url_download.format(latest_version, latest_version, platforms.macos + '.tar.gz')
+    random_version_url = constants.url_download.format(random_version, random_version, platforms.macos + '.tar.gz')
 
 # Change to the current test directory
 os.chdir(os.path.dirname(__file__))
