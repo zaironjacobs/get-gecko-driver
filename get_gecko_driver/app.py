@@ -157,7 +157,7 @@ class App:
             return True
         return False
 
-    def __print_latest_urls(self) -> None:
+    def __print_latest_urls(self):
         """ Print the latest url version for all platforms """
 
         get_driver_win = GetGeckoDriver(self.__platforms.win)
@@ -175,7 +175,7 @@ class App:
             if index < len(drivers) - 1:
                 print('')
 
-    def __print_latest_version(self) -> None:
+    def __print_latest_version(self):
         """ Print the latest version """
 
         try:
@@ -183,7 +183,7 @@ class App:
         except GetGeckoDriverError:
             print(self.__msg_no_latest_version_url_error)
 
-    def __print_latest_url(self) -> None:
+    def __print_latest_url(self):
         """ Print the url of the latest version """
 
         try:
@@ -191,16 +191,24 @@ class App:
         except GetGeckoDriverError:
             print(self.__msg_version_url_error)
 
-    def __print_version_url(self, version) -> None:
-        """ Print the url for a given version """
+    def __print_version_url(self, version):
+        """
+        Print the url for a given version
+
+        :param version: Geckodriver version
+        """
 
         try:
             print(self.__get_driver.version_url(version))
         except GetGeckoDriverError:
             print(self.__msg_version_url_error)
 
-    def __download_latest_version(self, extract) -> None:
-        """ Download the latest version """
+    def __download_latest_version(self, extract):
+        """
+        Download the latest version
+
+        :param extract: Extract the downloaded driver or not
+        """
 
         try:
             self.__get_driver.download_latest_version(extract=extract)
@@ -208,8 +216,13 @@ class App:
         except GetGeckoDriverError:
             print(self.__msg_download_error)
 
-    def __download_version(self, version, extract) -> None:
-        """ Download the version of a given version """
+    def __download_version(self, version, extract):
+        """
+        Download the version of a given version
+
+        :param version: Geckodriver version
+        :param extract: Extract the downloaded driver or not
+        """
 
         try:
             self.__get_driver.download_version(version, extract=extract)

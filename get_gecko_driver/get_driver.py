@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from requests.exceptions import HTTPError
 
-from . import constants
 from .platforms import Platforms
 from . import retriever
 from .exceptions import GetGeckoDriverError
@@ -20,29 +19,30 @@ from .exceptions import DownloadError
 
 
 class GetGeckoDriver:
-    def __init__(self, platform=None) -> None:
+    def __init__(self, platform=None):
         self.__platforms = Platforms()
 
         if not platform:
             if pl.system() == 'Windows':
-                self.__platform = self.__check_platform(self.__platforms.win)
+                self.__system_platform = self.__check_platform(self.__platforms.win)
             elif pl.system() == 'Linux':
-                self.__platform = self.__check_platform(self.__platforms.linux)
+                self.__system_platform = self.__check_platform(self.__platforms.linux)
             elif pl.system() == 'Darwin':
-                self.__platform = self.__check_platform(self.__platforms.macos)
+                self.__system_platform = self.__check_platform(self.__platforms.macos)
         else:
-            self.__platform = self.__check_platform(platform)
+            self.__system_platform = self.__check_platform(platform)
 
     def latest_version(self) -> str:
         """ Return the latest version """
 
-        result = requests.get(constants.GITHUB_GECKODRIVER_VERSION_URL)
-        if result.status_code != 200:
-            raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_VERSION_URL)
+        url_geckodriver_releases = 'https://github.com/mozilla/geckodriver/releases'
+        result = requests.get(url_geckodriver_releases)
+        if not result.ok:
+            raise GetGeckoDriverError('error: could not get ' + url_geckodriver_releases)
         soup = BeautifulSoup(result.content, 'html.parser')
-        anchor = soup.select_one(constants.GITHUB_GECKODRIVER_LATEST_VERSION_ANCHOR)
-        version = anchor.text
-
+        css_selector_latest_version = 'div.flex-md-row:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h1:nth-child(1) > a:nth-child(1)'
+        anchor = soup.select_one(css_selector_latest_version)
+        version = anchor.text.strip()
         self.__check_version(version)
         return version
 
@@ -52,76 +52,89 @@ class GetGeckoDriver:
         return self.version_url(self.latest_version())
 
     def version_url(self, version) -> str:
-        """ Return the version download url """
+        """
+        Return the version download url
+
+        :param version: Geckodriver version
+        """
 
         self.__check_version(version)
-
         arch = struct.calcsize('P') * 8
-        arch_64 = 64
+        url_download = 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-{}'
+        zip_ext = '.zip'
+        tar_gz_ext = '.tar.gz'
 
-        if self.__platform == self.__platforms.win:
-
+        if self.__system_platform == self.__platforms.win:
             # 64bit
-            if arch == arch_64:
+            if arch == 64:
                 try:
-                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.win_64)
-                           + constants.ZIP_TYPE)
+                    url = url_download.format(version, version, self.__platforms.win_64) + zip_ext
                     self.__check_url(url)
                     return url
                 except VersionUrlError:
+                    # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.win_32)
-                   + constants.ZIP_TYPE)
+            url = url_download.format(version, version, self.__platforms.win_32) + zip_ext
             self.__check_url(url)
             return url
 
-        elif self.__platform == self.__platforms.linux:
-
+        elif self.__system_platform == self.__platforms.linux:
             # 64bit
-            if arch == arch_64:
+            if arch == 64:
                 try:
-                    url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.linux_64)
-                           + constants.TAR_GZ_TYPE)
+                    url = url_download.format(version, version, self.__platforms.linux_64) + tar_gz_ext
                     self.__check_url(url)
                     return url
                 except VersionUrlError:
+                    # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.linux_32)
-                   + constants.TAR_GZ_TYPE)
+            url = url_download.format(version, version, self.__platforms.linux_32) + tar_gz_ext
             self.__check_url(url)
             return url
 
-        elif self.__platform == self.__platforms.macos:
-
-            url = (constants.GECKODRIVER_DOWNLOAD_URL.format(version, version, self.__platforms.macos)
-                   + constants.TAR_GZ_TYPE)
+        elif self.__system_platform == self.__platforms.macos:
+            # 64bit
+            if arch == 64:
+                try:
+                    url = url_download.format(version, version, self.__platforms.macos) + '-aarch64' + tar_gz_ext
+                    self.__check_url(url)
+                    return url
+                except VersionUrlError:
+                    # No 64 bit, get 32 bit
+                    pass
+            # 32bit
+            url = url_download.format(version, version, self.__platforms.macos) + tar_gz_ext
             self.__check_url(url)
             return url
 
-    def download_latest_version(self, output_path=None, extract=False) -> None:
-        """ Download the latest geckodriver version """
+    def download_latest_version(self, output_path=None, extract=False):
+        """
+        Download the latest geckodriver version
+
+        :param output_path: Path to download the driver to
+        :param extract: Extract the downloaded driver or not
+        """
 
         version = self.latest_version()
         self.download_version(version, output_path, extract)
 
     def download_version(self, version, output_path=None, extract=False) -> str:
-        """ Download a geckodriver version """
+        """
+        Download a geckodriver version
+
+        :param version: Geckodriver version
+        :param output_path: Path to download the driver to
+        :param extract: Extract the downloaded driver or not
+        """
 
         self.__check_version(version)
 
-        if len(str(output_path)) == 0:
-            # on path == '',
-            # ChromeDriver will be downloaded in the current dir
-            output_path = ''
-        elif not output_path:
-            # on path == None,
+        if not output_path:
+            # on path is None,
             # GeckoDriver will be downloaded at e.g. geckodriver/0.29.0/bin/geckodriver.exe
             output_path = self._default_output_path(version)
-
-        # on path == webdriver/bin (or any other dir name),
-        # GeckoDriver will be downloaded at webdriver/bin/geckodriver.exe
 
         def download(download_url, download_path) -> str:
             try:
@@ -129,42 +142,49 @@ class GetGeckoDriver:
             except (OSError, HTTPError, RequestException) as err:
                 raise DownloadError(err)
             if extract:
-                if self.__platform == self.__platforms.win:
+                if self.__system_platform == self.__platforms.win:
                     with zipfile.ZipFile(output_path_with_file_name, 'r') as zip_ref:
                         zip_ref.extractall(path=download_path)
                 else:
                     with tarfile.open(output_path_with_file_name, 'r:gz') as tar_gz_ref:
                         tar_gz_ref.extractall(path=download_path)
                 os.remove(output_path_with_file_name)
-                if self.__platform == self.__platforms.linux or self.__platform == self.__platforms.macos:
-                    os.chmod(download_path + '/' + constants.GECKODRIVER, 0o755)
+                if self.__system_platform == self.__platforms.linux or self.__system_platform == self.__platforms.macos:
+                    os.chmod(download_path + '/' + 'geckodriver', 0o755)
             return download_path
 
-        # Download the driver file and return the relative dir path of the driver file
+        # Download the driver file and return the path of the driver file
         url = self.version_url(version)
         return download(url, output_path)
 
-    def __check_url(self, url) -> None:
+    def __check_url(self, url):
         """ Check if url is valid """
 
         if requests.head(url).status_code != 302:
             raise VersionUrlError('Error: Invalid url (Possible cause: non-existent version)')
 
-    def __check_version(self, version) -> None:
-        """ Check if version format is valid """
+    def __check_version(self, version):
+        """
+        Check if version format is valid
+
+        :param version: Geckodriver version
+        """
 
         split_version = version.split('.')
-
         for number in split_version:
             if not number.isnumeric():
                 raise UnknownVersionError('Error: Invalid version format')
 
     def __check_platform(self, platform) -> str:
-        """ Check if platform is valid """
+        """
+        Check if platform is valid
+
+        :param platform: OS
+        """
 
         if platform not in self.__platforms.list:
-            raise UnknownPlatformError('error: platform not recognized, choose a platform from: '
-                                       + str(self.__platforms.list))
+            raise UnknownPlatformError(
+                f'error: platform not recognized, choose a platform from: {str(self.__platforms.list)}')
         return platform
 
     def install(self) -> None:
@@ -177,29 +197,26 @@ class GetGeckoDriver:
     def __get_all_geckodriver_versions(self) -> list:
         """ Return a list with all GeckoDriver versions """
 
-        def find_versions(param=None) -> list:
+        url_github_geckodriver_tags = 'https://github.com/mozilla/geckodriver/tags'
+
+        def find_versions(param=None):
             if not param:
-                url = constants.GITHUB_GECKODRIVER_TAGS_URL
+                url = url_github_geckodriver_tags
             else:
-                url = constants.GITHUB_GECKODRIVER_TAGS_URL + param
+                url = url_github_geckodriver_tags + param
 
-            res = requests.get(url)
+            response = requests.get(url)
+            if not response.ok:
+                raise GetGeckoDriverError('error: could not get ' + url_github_geckodriver_tags)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            box = soup.select_one('div.Box:nth-child(2)')
 
-            if res.status_code != 200:
-                raise GetGeckoDriverError('error: could not connect to ' + constants.GITHUB_GECKODRIVER_TAGS_URL)
-
-            soup = BeautifulSoup(res.content, 'html.parser')
-            box_el = soup.select_one('div.Box:nth-child(2)')
-
-            count = 0
             versions = []
-            for element in box_el.select('.d-flex > h4 > a'):
+            for element in box.select('.d-flex > h4 > a'):
                 versions.append(element.text.strip())
-                count += 1
 
             if len(versions) == 10:
                 versions += find_versions('?after=' + versions[-1])
-
             return versions
 
         all_versions = find_versions()
@@ -209,6 +226,10 @@ class GetGeckoDriver:
         return all_versions
 
     def _default_output_path(self, version) -> str:
-        """ Return the default output path """
+        """
+        Return the default output path
 
-        return constants.GECKODRIVER + '/' + version + '/' + 'bin'
+        :param version: Geckodriver version
+        """
+
+        return f'geckodriver/{version}/bin'
