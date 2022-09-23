@@ -148,6 +148,6 @@ dmypy.json
 cython_debug/
 
 # Downloads
-gecko_driver_downloads/
+geckodriver/
 
 

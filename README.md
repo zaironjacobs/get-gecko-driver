@@ -15,13 +15,13 @@ This Python package runs through a Jenkins test pipeline every hour to ensure pr
 To install:
 
 ```console
-$ pip install get-gecko-driver
+pip install get-gecko-driver
 ```
 
 To upgrade:
 
 ```console
-$ pip install get-gecko-driver --upgrade
+pip install get-gecko-driver --upgrade
 ```
 
 ## Usage
@@ -78,31 +78,31 @@ get_driver.download_version('0.27.0', extract=True)
 Print the latest version url of all platforms:
 
 ```console
-$ get-gecko-driver --latest-urls
+get-gecko-driver --latest-urls
 ```
 
 Print the latest version:
 
 ```console
-$ get-gecko-driver --latest-version
+get-gecko-driver --latest-version
 ```
 
 Print the latest version url:
 
 ```console
-$ get-gecko-driver --latest-url
+get-gecko-driver --latest-url
 ```
 
 Download the latest version and extract the file:
 
 ```console
-$ get-gecko-driver --download-latest --extract
+get-gecko-driver --download-latest --extract
 ```
 
 Download a specific version and extract the file:
 
 ```console
-$ get-gecko-driver --download-version 0.27.0 --extract
+get-gecko-driver --download-version 0.27.0 --extract
 ```
 
 #### The downloaded driver can be found at:
