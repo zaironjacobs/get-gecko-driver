@@ -1,231 +1,163 @@
-import sys
-import argparse
-from signal import signal, SIGINT
-
-import colorama
+import typer
 
 from . import __version__
-from . import arguments
 from .get_driver import GetGeckoDriver
-from .platforms import Platforms
+from .enums import Platform
 from .exceptions import GetGeckoDriverError
 
-
-def main():
-    # noinspection PyUnusedLocal
-    def signal_handler(signal_received, frame):
-        """ Handles clean Ctrl+C exit """
-
-        sys.stdout.write('\n')
-        sys.exit(0)
-
-    signal(SIGINT, signal_handler)
-    App()
+app = typer.Typer(name='Get GeckoDriver', add_completion=False)
 
 
-class App:
+@app.command()
+def main(version: bool = typer.Option(default=False,
+                                      help='Application version',
+                                      show_default=False),
 
-    def __init__(self):
-        self.__c_fore = colorama.Fore
-        self.__c_style = colorama.Style
-        colorama.init()
+         latest_version: bool = typer.Option(default=False,
+                                             help='Print the latest version',
+                                             show_default=False),
 
-        self.__platforms = Platforms()
+         latest_urls: bool = typer.Option(default=False,
+                                          help='Print latest version urls for all platforms',
+                                          show_default=False),
 
-        self.__msg_download_finished = 'download finished'
-        self.__msg_required_choose_platform = (self.__c_fore.RED + 'required: choose one of the following platforms: '
-                                               + str(self.__platforms.list) + self.__c_style.RESET_ALL)
-        self.__msg_required_add_version = (self.__c_fore.RED + 'required: add a version'
-                                           + self.__c_style.RESET_ALL)
-        self.__msg_optional_add_extract = 'optional: add --extract to extract the zip file'
-        self.__msg_error_unrecognized_argument = (
-                self.__c_fore.RED + 'error: unrecognized argument(s) detected' + self.__c_style.RESET_ALL
-                + '\n' + 'tip: use --help to see all available arguments')
-        self.__msg_download_error = (self.__c_fore.RED + 'error: an error occurred at downloading'
-                                     + self.__c_style.RESET_ALL)
-        self.__msg_version_url_error = (self.__c_fore.RED + 'error: could not find version url'
-                                        + self.__c_style.RESET_ALL)
-        self.__msg_no_latest_version_url_error = (self.__c_fore.RED
-                                                  + 'error: could not find the latest version'
-                                                  + self.__c_style.RESET_ALL)
-        self.__msg_not_found_error = (self.__c_fore.RED + 'not found'
-                                      + self.__c_style.RESET_ALL)
+         version_url: str = typer.Option(default=None,
+                                         help='Print the version download url',
+                                         show_default=False),
 
-        self.__parser = argparse.ArgumentParser(add_help=False)
-        for i, arg in enumerate(arguments.args_options):
-            self.__parser.add_argument(arguments.args_options[i][0], nargs='*')
-        self.__args, self.__unknown = self.__parser.parse_known_args()
+         latest_url: bool = typer.Option(default=False,
+                                         help='Print the latest version url for a platform',
+                                         show_default=False),
 
-        self.__get_driver = GetGeckoDriver()
+         download_latest: bool = typer.Option(default=False,
+                                              help='Download the latest version for a platform',
+                                              show_default=False),
 
-        if self.__unknown:
-            print(self.__msg_error_unrecognized_argument)
-            sys.exit(0)
+         download_version: str = typer.Option(default=None,
+                                              help='Download a specific version',
+                                              show_default=False),
 
-        ###################
-        # DEFAULT NO ARGS #
-        ###################
-        if len(sys.argv) == 1:
-            arguments.print_help()
-            sys.exit(0)
+         extract: bool = typer.Option(default=False,
+                                      help='Extract the compressed driver file',
+                                      show_default=False)):
+    """ Main """
 
-        ########
-        # HELP #
-        ########
-        self.__arg_help = self.__args.help
-        if self.__arg_passed(self.__arg_help):
-            arguments.print_help()
-            sys.exit(0)
+    if latest_urls:
+        __print_latest_urls()
 
-        ##################
-        # LATEST VERSION #
-        ##################
-        self.__arg_latest_version = self.__args.latest_version
-        if self.__arg_passed(self.__arg_latest_version):
-            self.__print_latest_version()
-            sys.exit(0)
+    elif version_url:
+        __print_version_url(version=version_url)
 
-        ###############
-        # LATEST URLS #
-        ###############
-        self.__arg_latest_urls = self.__args.latest_urls
-        if self.__arg_passed(self.__arg_latest_urls):
-            self.__print_latest_urls()
-            sys.exit(0)
+    elif download_latest:
+        __download_latest_version(extract=extract)
 
-        ###############
-        # VERSION URL #
-        ###############
-        self.__arg_version_url = self.__args.version_url
-        if self.__arg_passed(self.__arg_version_url):
-            if len(self.__arg_version_url) < 1:
-                print(self.__msg_required_add_version)
-            else:
-                self.__print_version_url(self.__arg_version_url[0])
-            sys.exit(0)
+    elif download_version:
+        __download_version(version=download_version, extract=extract)
 
-        ##############
-        # LATEST URL #
-        ##############
-        self.__arg_latest_url = self.__args.latest_url
-        if self.__arg_passed(self.__arg_latest_url):
-            self.__print_latest_url()
-            sys.exit(0)
+    elif latest_url:
+        __print_latest_url()
 
-        ###################
-        # DOWNLOAD LATEST #
-        ###################
-        self.__arg_download_latest = self.__args.download_latest
-        if self.__arg_passed(self.__arg_download_latest):
-            extract = False
-            self.__arg_extract = self.__args.extract
-            if self.__arg_passed(self.__arg_extract):
-                extract = True
-            self.__download_latest_version(extract)
-            sys.exit(0)
+    elif latest_version:
+        __print_latest_version()
 
-        ####################
-        # DOWNLOAD VERSION #
-        ####################
-        self.__arg_download_version = self.__args.download_version
-        if self.__arg_passed(self.__arg_download_version):
-            extract = False
-            self.__arg_extract = self.__args.extract
-            if self.__arg_passed(self.__arg_extract):
-                extract = True
-            if len(self.__arg_download_version) < 1:
-                print(self.__msg_required_add_version)
-                print(self.__msg_optional_add_extract)
-                sys.exit(0)
-            else:
-                version = self.__arg_download_version[0]
-                self.__download_version(version, extract)
-            sys.exit(0)
+    elif version:
+        print(f'v{__version__}')
 
-        ###########
-        # VERSION #
-        ###########
-        self.__arg_version = self.__args.version
-        if self.__arg_passed(self.__arg_version):
-            print('v' + __version__)
-            sys.exit(0)
 
-    def __arg_passed(self, arg) -> bool:
-        """ Check if the argument was passed """
+def __print_latest_urls():
+    """ Print the latest url version for all platforms """
 
-        if isinstance(arg, list):
-            return True
-        return False
+    get_driver_win = GetGeckoDriver(Platform.win)
+    get_driver_linux = GetGeckoDriver(Platform.linux)
+    get_driver_mac = GetGeckoDriver(Platform.macos)
+    get_drivers = {'Windows': get_driver_win, 'Linux': get_driver_linux, 'macOS': get_driver_mac}
 
-    def __print_latest_urls(self):
-        """ Print the latest url version for all platforms """
-
-        get_driver_win = GetGeckoDriver(self.__platforms.win)
-        get_driver_linux = GetGeckoDriver(self.__platforms.linux)
-        get_driver_macos = GetGeckoDriver(self.__platforms.macos)
-        drivers = {'Windows': get_driver_win, 'Linux': get_driver_linux, 'macOS': get_driver_macos}
-
-        for index, (key, value) in enumerate(drivers.items()):
-            print('Latest version for ' + key + ': ')
-            try:
-                print('latest: ' + value.latest_version_url())
-            except GetGeckoDriverError:
-                print(self.__msg_no_latest_version_url_error)
-
-            if index < len(drivers) - 1:
-                print('')
-
-    def __print_latest_version(self):
-        """ Print the latest version """
-
+    result = ''
+    for index, (key, value) in enumerate(get_drivers.items()):
         try:
-            print(self.__get_driver.latest_version())
+            result += f'Latest version for {key}:'
+            result += value.latest_version_url()
+            if index < len(get_drivers) - 1:
+                result += '\n'
         except GetGeckoDriverError:
-            print(self.__msg_no_latest_version_url_error)
+            continue
 
-    def __print_latest_url(self):
-        """ Print the url of the latest version """
+    print(result)
 
-        try:
-            print(self.__get_driver.latest_version_url())
-        except GetGeckoDriverError:
-            print(self.__msg_version_url_error)
 
-    def __print_version_url(self, version):
-        """
-        Print the url for a given version
+def __print_latest_version():
+    """ Print the latest version """
 
-        :param version: Geckodriver version
-        """
+    get_driver = GetGeckoDriver()
 
-        try:
-            print(self.__get_driver.version_url(version))
-        except GetGeckoDriverError:
-            print(self.__msg_version_url_error)
+    error = ''
 
-    def __download_latest_version(self, extract):
-        """
-        Download the latest version
+    try:
+        print(get_driver.latest_version())
+    except GetGeckoDriverError:
+        print(error)
 
-        :param extract: Extract the downloaded driver or not
-        """
 
-        try:
-            self.__get_driver.download_latest_version(extract=extract)
-            print(self.__msg_download_finished)
-        except GetGeckoDriverError:
-            print(self.__msg_download_error)
+def __print_latest_url():
+    """ Print the url of the latest version """
 
-    def __download_version(self, version, extract):
-        """
-        Download the version of a given version
+    get_driver = GetGeckoDriver()
 
-        :param version: Geckodriver version
-        :param extract: Extract the downloaded driver or not
-        """
+    error = 'Could not find version url'
 
-        try:
-            self.__get_driver.download_version(version, extract=extract)
-            print(self.__msg_download_finished)
-        except GetGeckoDriverError:
-            print(self.__msg_download_error)
+    try:
+        print(get_driver.latest_version_url())
+    except GetGeckoDriverError:
+        print(error)
+
+
+def __print_version_url(version: str):
+    """
+    Print the url for a given version
+
+    :param version: Geckodriver version
+    """
+
+    get_driver = GetGeckoDriver()
+
+    error = 'Could not find version url'
+
+    try:
+        print(get_driver.version_url(version))
+    except GetGeckoDriverError:
+        print(error)
+
+
+def __download_latest_version(extract: bool):
+    """
+    Download the latest version
+
+    :param extract: Extract the downloaded driver or not
+    """
+
+    get_driver = GetGeckoDriver()
+
+    error = 'Could not download latest version'
+
+    try:
+        get_driver.download_latest_version(extract=extract)
+    except GetGeckoDriverError:
+        print(error)
+
+
+def __download_version(version: str, extract: bool):
+    """
+    Download the version of a given version
+
+    :param version: Geckodriver version
+    :param extract: Extract the downloaded driver or not
+    """
+
+    get_driver = GetGeckoDriver()
+
+    error = 'Could not download latest version'
+
+    try:
+        get_driver.download_version(version=version, extract=extract)
+    except GetGeckoDriverError:
+        print(error)

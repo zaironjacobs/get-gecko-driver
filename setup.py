@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 name = 'get-gecko-driver'
-version = '1.3.6'
+version = '1.3.7'
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
@@ -11,7 +11,7 @@ requires = [
     'bs4>=0.0.1',
     'requests>=2.28.1',
     'urllib3>=1.26.12',
-    'colorama>=0.4.4'
+    'typer>=0.6.1'
 ]
 
 setup(
@@ -26,7 +26,7 @@ setup(
     keywords=['gecko', 'geckodriver', 'download', 'install', 'web', 'driver', 'tool'],
     packages=find_packages(),
     entry_points={
-        'console_scripts': [f'{name}=get_gecko_driver.app:main'],
+        'console_scripts': [f'{name}=get_gecko_driver.app:app'],
     },
     install_requires=requires,
     license='MIT',
