@@ -147,7 +147,7 @@ def __download_latest_version(extract: bool):
 
 def __download_version(version: str, extract: bool):
     """
-    Download the version of a given version
+    Download driver version
 
     :param version: Geckodriver version
     :param extract: Extract the downloaded driver or not
