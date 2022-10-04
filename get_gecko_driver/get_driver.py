@@ -20,7 +20,7 @@ from .exceptions import DownloadError
 
 
 class GetGeckoDriver:
-    def __init__(self, platform: Platform | None = None):
+    def __init__(self, platform: Platform = None):
         if not platform:
             if pl.system() == 'Windows':
                 self.__system_platform = self.__check_platform(Platform.win)
@@ -106,7 +106,7 @@ class GetGeckoDriver:
             self.__check_if_url_is_valid(url)
             return url
 
-    def download_latest_version(self, output_path: str | None = None, extract: bool = False):
+    def download_latest_version(self, output_path: str = None, extract: bool = False):
         """
         Download the latest geckodriver version
 
@@ -117,7 +117,7 @@ class GetGeckoDriver:
         version = self.latest_version()
         self.download_version(version=version, output_path=output_path, extract=extract)
 
-    def download_version(self, version: str, output_path: str | None = None, extract: bool = False) -> str:
+    def download_version(self, version: str, output_path: str = None, extract: bool = False) -> str:
         """
         Download a geckodriver version
 
