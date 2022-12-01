@@ -1,7 +1,7 @@
 import os
+import platform as pl
 import shutil
 import subprocess
-import platform as pl
 from os import path
 
 import pytest
@@ -21,18 +21,20 @@ random_version = config('RANDOM_VERSION')
 if pl.system() == 'Windows':
     file_name = 'geckodriver.exe'
     file_name_compressed = 'win64.zip'
-    latest_version_url = constants.url_download.format(latest_version, latest_version, Platform.win64 + '.zip')
-    random_version_url = constants.url_download.format(random_version, random_version, Platform.win64 + '.zip')
+    latest_version_url = constants.url_download.format(latest_version, latest_version, Platform.win64.value + '.zip')
+    random_version_url = constants.url_download.format(random_version, random_version, Platform.win64.value + '.zip')
 elif pl.system() == 'Linux':
     file_name = 'geckodriver'
     file_name_compressed = 'linux64.tar.gz'
-    latest_version_url = constants.url_download.format(latest_version, latest_version, Platform.linux64 + '.tar.gz')
-    random_version_url = constants.url_download.format(random_version, random_version, Platform.linux64 + '.tar.gz')
+    latest_version_url = constants.url_download.format(latest_version, latest_version,
+                                                       Platform.linux64.value + '.tar.gz')
+    random_version_url = constants.url_download.format(random_version, random_version,
+                                                       Platform.linux64.value + '.tar.gz')
 elif pl.system() == 'Darwin':
     file_name = 'geckodriver'
     file_name_compressed = 'macos.tar.gz'
-    latest_version_url = constants.url_download.format(latest_version, latest_version, Platform.macos + '.tar.gz')
-    random_version_url = constants.url_download.format(random_version, random_version, Platform.macos + '.tar.gz')
+    latest_version_url = constants.url_download.format(latest_version, latest_version, Platform.macos.value + '.tar.gz')
+    random_version_url = constants.url_download.format(random_version, random_version, Platform.macos.value + '.tar.gz')
 
 # Change to the current test directory
 os.chdir(os.path.dirname(__file__))

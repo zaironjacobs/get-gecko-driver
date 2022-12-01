@@ -64,14 +64,14 @@ class GetGeckoDriver:
             # 64bit
             if arch == 64:
                 try:
-                    url = constants.url_download.format(version, version, Platform.win64) + zip_ext
+                    url = constants.url_download.format(version, version, Platform.win64.value) + zip_ext
                     self.__check_if_url_is_valid(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = constants.url_download.format(version, version, Platform.win32) + zip_ext
+            url = constants.url_download.format(version, version, Platform.win32.value) + zip_ext
             self.__check_if_url_is_valid(url)
             return url
 
@@ -79,14 +79,14 @@ class GetGeckoDriver:
             # 64bit
             if arch == 64:
                 try:
-                    url = constants.url_download.format(version, version, Platform.linux64) + tar_gz_ext
+                    url = constants.url_download.format(version, version, Platform.linux64.value) + tar_gz_ext
                     self.__check_if_url_is_valid(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = constants.url_download.format(version, version, Platform.linux32) + tar_gz_ext
+            url = constants.url_download.format(version, version, Platform.linux32.value) + tar_gz_ext
             self.__check_if_url_is_valid(url)
             return url
 
@@ -95,14 +95,14 @@ class GetGeckoDriver:
             if arch == 64:
                 try:
                     url = constants.url_download.format(version, version,
-                                                        Platform.macos) + '-aarch64' + tar_gz_ext
+                                                        Platform.macos.value) + '-aarch64' + tar_gz_ext
                     self.__check_if_url_is_valid(url)
                     return url
                 except VersionUrlError:
                     # No 64 bit, get 32 bit
                     pass
             # 32bit
-            url = constants.url_download.format(version, version, Platform.macos) + tar_gz_ext
+            url = constants.url_download.format(version, version, Platform.macos.value) + tar_gz_ext
             self.__check_if_url_is_valid(url)
             return url
 
@@ -176,7 +176,7 @@ class GetGeckoDriver:
             if not number.isnumeric():
                 raise UnknownVersionError('Invalid version format')
 
-    def __check_platform(self, platform: Platform) -> str:
+    def __check_platform(self, platform: Platform) -> Platform:
         """
         Check if platform is valid
 
