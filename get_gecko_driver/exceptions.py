@@ -16,4 +16,3 @@ class UnknownVersionError(GetGeckoDriverError):
 
 class DownloadError(GetGeckoDriverError):
     pass
-

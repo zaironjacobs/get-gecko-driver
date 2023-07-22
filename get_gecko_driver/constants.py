@@ -1,4 +1,6 @@
-url_geckodriver_releases = 'https://github.com/mozilla/geckodriver/releases'
-url_download = 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-{}'
-url_github_geckodriver_tags = 'https://github.com/mozilla/geckodriver/tags'
-css_selector_latest_version = '.Box-body .Link--primary'
+GECKODRIVER_RELEASES_URL = "https://github.com/mozilla/geckodriver/releases"
+DOWNLOAD_URL = (
+    "https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-{}"
+)
+GITHUB_GECKODRIVER_TAGS_URL = "https://github.com/mozilla/geckodriver/tags"
+CSS_SELECTOR_LATEST_VERSION = ".Box-body .Link--primary"
