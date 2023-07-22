@@ -190,13 +190,13 @@ class TestApp:
         yield
         try:
             shutil.rmtree("geckodriver")
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             pass
         try:
             shutil.rmtree("webdriver")
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             pass
         try:
-            shutil.rmtree("my_dir_1/my_dir_2")
-        except FileNotFoundError:
+            shutil.rmtree("my_dir_1")
+        except (FileNotFoundError, PermissionError):
             pass
