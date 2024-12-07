@@ -2,12 +2,12 @@ from setuptools import setup
 from setuptools import find_packages
 
 name = "get-gecko-driver"
-version = "1.3.13"
+version = "1.4"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-requires = ["bs4>=0.0.1", "requests>=2.31.0", "urllib3>=1.26.12", "typer>=0.6.1"]
+requires = ["beautifulsoup4==4.12.3", "requests==2.32.3", "urllib3==2.2.3", "typer==0.15.1"]
 
 setup(
     name=name,
@@ -30,7 +30,7 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.11",
         "Natural Language :: English",
     ],
     python_requires=">=3",
