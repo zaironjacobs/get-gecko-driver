@@ -1,14 +1,13 @@
-Get GeckoDriver
-=================
+# Get GeckoDriver
+
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/get-gecko-driver?color=blue)](https://pypi.python.org/pypi/get-gecko-driver)
 [![PyPI](https://img.shields.io/pypi/v/get-gecko-driver?color=blue)](https://pypi.python.org/pypi/get-gecko-driver)
-[![PyPI - Status](https://img.shields.io/pypi/status/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
 [![PyPI - License](https://img.shields.io/pypi/l/get-gecko-driver)](https://pypi.python.org/pypi/get-gecko-driver)
+
+[![tests](https://github.com/zaironjacobs/get-gecko-driver/actions/workflows/test.yml/badge.svg)](https://github.com/zaironjacobs/get-gecko-driver/actions/workflows/test.yml)
 
 A tool to download and install GeckoDriver. Download the latest version or another specific version. You can use this
 tool as a package import or as a command-line application.
-
-This Python package runs through a Jenkins test pipeline every hour to ensure proper functionality.
 
 ## Install
 
