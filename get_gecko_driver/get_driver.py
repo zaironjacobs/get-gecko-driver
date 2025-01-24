@@ -40,7 +40,9 @@ class GetGeckoDriver:
         self.__tar_gz_ext = ".tar.gz"
 
     def latest_version(self) -> str:
-        """Return the latest version"""
+        """
+        Return the latest version.
+        """
 
         result = requests.get(constants.GECKODRIVER_RELEASES_URL)
         if not result.ok:
@@ -58,15 +60,17 @@ class GetGeckoDriver:
         raise UnknownVersionError("Could not find version")
 
     def latest_version_url(self) -> str:
-        """Return the latest version url"""
+        """
+        Return the latest version url.
+        """
 
         return self.version_url(self.latest_version())
 
     def version_url(self, version: str) -> str:
         """
-        Return the version download url
+        Return the version download url.
 
-        :param version: Geckodriver version
+        :param version: Geckodriver version.
         """
 
         if not self.__check_if_version_format_is_valid(version):
@@ -126,10 +130,10 @@ class GetGeckoDriver:
         self, output_path: str = None, extract: bool = False
     ) -> str:
         """
-        Download the latest geckodriver version
+        Download the latest geckodriver version.
 
-        :param output_path: Path to download the driver to
-        :param extract: Extract the downloaded driver or not
+        :param output_path: Path to download the driver to.
+        :param extract: Extract the downloaded driver or not.
         """
 
         version = self.latest_version()
@@ -143,11 +147,11 @@ class GetGeckoDriver:
         self, version: str, output_path: str = None, extract: bool = False
     ) -> str:
         """
-        Download a geckodriver version
+        Download a geckodriver version.
 
-        :param version: Geckodriver version
-        :param output_path: Path to download the driver to
-        :param extract: Extract the downloaded driver or not
+        :param version: Geckodriver version.
+        :param output_path: Path to download the driver to.
+        :param extract: Extract the downloaded driver or not.
         """
 
         if not self.__check_if_version_format_is_valid(version):
@@ -201,9 +205,9 @@ class GetGeckoDriver:
 
     def __check_if_version_format_is_valid(self, version: str) -> bool:
         """
-        Check if version format is valid
+        Check if version format is valid.
 
-        :param version: Geckodriver version
+        :param version: Geckodriver version.
         """
 
         split_version = version.split(".")
@@ -215,9 +219,9 @@ class GetGeckoDriver:
 
     def __check_if_os_platform_is_valid(self, os_platform: OsPlatform) -> bool:
         """
-        Check if platform is valid
+        Check if platform is valid.
 
-        :param os_platform: OS
+        :param os_platform: OS.
         """
 
         if os_platform not in self.__os_platforms_list:
@@ -226,7 +230,9 @@ class GetGeckoDriver:
         return True
 
     def install(self, output_path: str = None) -> str:
-        """Install the latest GeckoDriver version"""
+        """
+        Install the latest GeckoDriver version.
+        """
 
         if output_path:
             self.download_version(
@@ -245,7 +251,9 @@ class GetGeckoDriver:
         return output_path
 
     def __get_all_geckodriver_versions(self) -> list:
-        """Return a list with all GeckoDriver versions"""
+        """
+        Return a list with all GeckoDriver versions.
+        """
 
         def find_versions(param=None):
             if not param:
@@ -279,9 +287,9 @@ class GetGeckoDriver:
 
     def _output_path(self, version: str) -> str:
         """
-        Get the output path
+        Get the output path.
 
-        :param version: Geckodriver version
+        :param version: Geckodriver version.
         """
 
         return f"geckodriver/{version}/bin"

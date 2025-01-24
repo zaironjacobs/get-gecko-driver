@@ -9,9 +9,9 @@ from requests.exceptions import HTTPError
 
 def download(url: str, output_path: str = None, file_name: str = None):
     """
-    Download a file from url
-    If output_path is None, the file will be downloaded directly at the current directory
-    If file_name is None, the file name from the url will be used
+    Download a file from url.
+    If output_path is None, the file will be downloaded directly at the current directory.
+    If file_name is None, the file name from the url will be used.
     """
 
     session = __retry_session(
@@ -51,7 +51,9 @@ def download(url: str, output_path: str = None, file_name: str = None):
 def __retry_session(
     retries: int, backoff_factor: float, status_forcelist: any, method_whitelist: any
 ):
-    """Retry session"""
+    """
+    Retry session.
+    """
 
     retry = Retry(
         total=retries,
@@ -70,14 +72,18 @@ def __retry_session(
 
 
 def __get_file_name_from_url(url: str):
-    """Get file name from url"""
+    """
+    Get file name from url.
+    """
 
     path = urlparse(url).path
     return path.split("/")[-1]
 
 
 def __makedirs(path: str):
-    """Make dirs"""
+    """
+    Make dirs.
+    """
 
     try:
         if not os.path.exists(path):

@@ -41,7 +41,9 @@ def main(
         default=False, help="Extract the compressed driver file", show_default=False
     ),
 ):
-    """Main"""
+    """
+    Main.
+    """
 
     if latest_urls:
         __print_latest_urls()
@@ -66,7 +68,9 @@ def main(
 
 
 def __print_latest_urls():
-    """Print the latest url version for all platforms"""
+    """
+    Print the latest url version for all platforms.
+    """
 
     get_driver_win = GetGeckoDriver(OsPlatform.win)
     get_driver_linux = GetGeckoDriver(OsPlatform.linux)
@@ -91,7 +95,9 @@ def __print_latest_urls():
 
 
 def __print_latest_version():
-    """Print the latest version"""
+    """
+    Print the latest version.
+    """
 
     get_driver = GetGeckoDriver()
 
@@ -104,7 +110,9 @@ def __print_latest_version():
 
 
 def __print_latest_url():
-    """Print the url of the latest version"""
+    """
+    Print the url of the latest version.
+    """
 
     get_driver = GetGeckoDriver()
 
@@ -118,9 +126,9 @@ def __print_latest_url():
 
 def __print_version_url(version: str):
     """
-    Print the url for a given version
+    Print the url for a given version.
 
-    :param version: Geckodriver version
+    :param version: Geckodriver version.
     """
 
     get_driver = GetGeckoDriver()
@@ -135,9 +143,9 @@ def __print_version_url(version: str):
 
 def __download_latest_version(extract: bool):
     """
-    Download the latest version
+    Download the latest version.
 
-    :param extract: Extract the downloaded driver or not
+    :param extract: Extract the downloaded driver or not.
     """
 
     get_driver = GetGeckoDriver()
@@ -152,10 +160,10 @@ def __download_latest_version(extract: bool):
 
 def __download_version(version: str, extract: bool):
     """
-    Download driver version
+    Download driver version.
 
-    :param version: Geckodriver version
-    :param extract: Extract the downloaded driver or not
+    :param version: Geckodriver version.
+    :param extract: Extract the downloaded driver or not.
     """
 
     get_driver = GetGeckoDriver()
