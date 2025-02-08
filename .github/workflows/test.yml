@@ -30,4 +30,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest get_gecko_driver/test
+          pytest tests
