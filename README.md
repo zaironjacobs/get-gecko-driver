@@ -127,5 +127,7 @@ get-gecko-driver --download-version 0.27.0 --extract
 
 --extract                   Extract the compressed driver file.
 
+--driver-filename           Print the driver filename.
+
 --version                   App version.
 ```

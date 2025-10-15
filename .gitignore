@@ -150,4 +150,5 @@ cython_debug/
 # Downloads
 geckodriver/
 
-
+# pyenv
+.python-version

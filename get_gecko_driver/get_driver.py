@@ -32,12 +32,26 @@ class GetGeckoDriver:
         else:
             if self.__check_if_os_platform_is_valid(os_platform):
                 self.__os_platform = os_platform
-            else:
-                raise UnknownPlatformError("Unknown platform")
+        if not self.__os_platform:
+            raise UnknownPlatformError("Unknown OS platform.")
 
         self.__arch = struct.calcsize("P") * 8
         self.__zip_ext = ".zip"
         self.__tar_gz_ext = ".tar.gz"
+
+    def driver_filename(self) -> str:
+        """
+        Driver filename.
+        """
+
+        if self.__os_platform == OsPlatform.win:
+            return "geckodriver.exe"
+        elif self.__os_platform == OsPlatform.linux:
+            return "geckodriver"
+        elif self.__os_platform == OsPlatform.mac:
+            return "geckodriver"
+
+        raise UnknownPlatformError("Unknown OS platform.")
 
     def latest_version(self) -> str:
         """
@@ -47,7 +61,7 @@ class GetGeckoDriver:
         result = requests.get(constants.GECKODRIVER_RELEASES_URL)
         if not result.ok:
             raise GetGeckoDriverError(
-                f"Could not fetch from {constants.GECKODRIVER_RELEASES_URL}"
+                f"Could not fetch from {constants.GECKODRIVER_RELEASES_URL}."
             )
 
         soup = BeautifulSoup(result.content, "html.parser")
@@ -57,7 +71,7 @@ class GetGeckoDriver:
         if self.__check_if_version_format_is_valid(version):
             return version
 
-        raise UnknownVersionError("Could not find version")
+        raise UnknownVersionError("Could not find version.")
 
     def latest_version_url(self) -> str:
         """
@@ -74,7 +88,7 @@ class GetGeckoDriver:
         """
 
         if not self.__check_if_version_format_is_valid(version):
-            raise UnknownVersionError("Invalid version format")
+            raise UnknownVersionError("Invalid version format.")
 
         if self.__os_platform == OsPlatform.win:
             # 64bit
@@ -124,7 +138,7 @@ class GetGeckoDriver:
             if self.__check_if_url_is_valid(url):
                 return url
 
-        raise VersionUrlError(f"Could not find download url for version {version}")
+        raise VersionUrlError(f"Could not find download url for version {version}.")
 
     def download_latest_version(
         self, output_path: str = None, extract: bool = False
@@ -155,7 +169,7 @@ class GetGeckoDriver:
         """
 
         if not self.__check_if_version_format_is_valid(version):
-            raise UnknownVersionError("Invalid version format")
+            raise UnknownVersionError("Invalid version format.")
 
         if not output_path:
             # on path is None, the driver will be downloaded at e.g. geckodriver/0.29.0/bin/geckodriver.exe
@@ -192,9 +206,9 @@ class GetGeckoDriver:
 
     def __check_if_url_is_valid(self, url: str) -> bool:
         """
-        Check if url is valid
+        Check if url is valid.
 
-        :param url: The driver download url
+        :param url: The driver download url.
         """
 
         status_code = requests.head(url).status_code
@@ -264,7 +278,7 @@ class GetGeckoDriver:
             response = requests.get(url)
             if not response.ok:
                 raise GetGeckoDriverError(
-                    f"Could not get {constants.GITHUB_GECKODRIVER_TAGS_URL}"
+                    f"Could not get {constants.GITHUB_GECKODRIVER_TAGS_URL}."
                 )
             soup = BeautifulSoup(response.content, "html.parser")
             box = soup.select_one("div.Box:nth-child(2)")

@@ -6,13 +6,11 @@ from get_gecko_driver.exceptions import GetGeckoDriverError
 from get_gecko_driver.get_driver import GetGeckoDriver
 
 app = typer.Typer(name="Get GeckoDriver", add_completion=False)
+get_driver = GetGeckoDriver()
 
 
 @app.command()
 def main(
-    version: bool = typer.Option(
-        default=False, help="Application version", show_default=False
-    ),
     latest_version: bool = typer.Option(
         default=False, help="Print the latest version", show_default=False
     ),
@@ -40,6 +38,12 @@ def main(
     extract: bool = typer.Option(
         default=False, help="Extract the compressed driver file", show_default=False
     ),
+    driver_filename: bool = typer.Option(
+        default=False, help="Driver filename", show_default=False
+    ),
+    version: bool = typer.Option(
+        default=False, help="Application version", show_default=False
+    ),
 ):
     """
     Main.
@@ -62,6 +66,9 @@ def main(
 
     elif latest_version:
         __print_latest_version()
+
+    elif driver_filename:
+        print(get_driver.driver_filename())
 
     elif version:
         print(f"v{__version__}")
@@ -99,8 +106,6 @@ def __print_latest_version():
     Print the latest version.
     """
 
-    get_driver = GetGeckoDriver()
-
     error = ""
 
     try:
@@ -113,8 +118,6 @@ def __print_latest_url():
     """
     Print the url of the latest version.
     """
-
-    get_driver = GetGeckoDriver()
 
     error = "Could not find version url"
 
@@ -131,8 +134,6 @@ def __print_version_url(version: str):
     :param version: Geckodriver version.
     """
 
-    get_driver = GetGeckoDriver()
-
     error = "Could not find version url"
 
     try:
@@ -147,8 +148,6 @@ def __download_latest_version(extract: bool):
 
     :param extract: Extract the downloaded driver or not.
     """
-
-    get_driver = GetGeckoDriver()
 
     error = "Could not download latest version"
 
@@ -165,8 +164,6 @@ def __download_version(version: str, extract: bool):
     :param version: Geckodriver version.
     :param extract: Extract the downloaded driver or not.
     """
-
-    get_driver = GetGeckoDriver()
 
     error = "Could not download latest version"
 
