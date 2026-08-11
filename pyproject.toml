@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "get-gecko-driver"
+version = "1.5.3"
+description = "A tool to download and install GeckoDriver."
+readme = "README.md"
+license = "MIT"
+license-files = [
+    "LICENSE",
+    "NOTICE.txt",
+    "licenses.json",
+]
+authors = [
+    {name = "Zairon Jacobs", email = "zaironjacobs@gmail.com"}
+]
+keywords = ["gecko", "geckodriver", "download", "install", "web", "driver", "tool"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.11",
+    "Natural Language :: English",
+]
+requires-python = ">=3"
+dependencies = [
+    "beautifulsoup4==4.13.5",
+    "requests==2.33.0",
+    "urllib3==2.7.0",
+    "typer==0.17.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/zaironjacobs/get-gecko-driver"
+Download = "https://github.com/zaironjacobs/get-gecko-driver/archive/v1.5.3.tar.gz"
+
+[project.scripts]
+get-gecko-driver = "get_gecko_driver.app:app"
+
+[tool.setuptools]
+packages = ["get_gecko_driver"]
