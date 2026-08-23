@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.14
 
 # Set workdir
 WORKDIR /app
@@ -12,14 +12,14 @@ RUN install -d -m 0755 /etc/apt/keyrings && \
 # Install Firefox
 RUN apt update && apt install firefox -y
 
-# Copy test requirements
-COPY requirements-test.txt .
+# Copy pyproject.toml
+COPY pyproject.toml .
 
-# Install test requirements
-RUN pip install --no-cache-dir --upgrade -r requirements-test.txt
+# Install test dependencies
+RUN pip install --group test
 
 # Copy app
 COPY . .
 
 # Install app
-RUN pip install --no-cache-dir --upgrade .
+RUN pip install .
